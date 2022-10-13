@@ -1,0 +1,12 @@
+{
+  "name": "mcgill-technical-project",
+  "version": "1.0.0",
+  "description": "Repo for the technical project of Isaac McGill",
+  "scripts": {
+    "database": "docker-compose up -d",
+    "shutdown": "docker-compose down",
+    "extract-db": "tar.exe -xf db.zip"
+  },
+  "author": "Isaac McGill",
+  "license": "Apache-2.0"
+}
