@@ -5,8 +5,19 @@
   "scripts": {
     "database": "docker-compose up -d",
     "shutdown": "docker-compose down",
-    "extract-db": "tar.exe -xf db.zip"
+    "extract-db": "tar.exe -xf db.zip",
+    "install": ""
   },
   "author": "Isaac McGill",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "aws-sdk": "^2.1232.0",
+    "axios": "^1.1.3",
+    "cli-table3": "^0.6.3",
+    "console-read-write": "^0.1.1",
+    "html-to-text": "^8.2.1",
+    "inquirer": "^8.2.4",
+    "open": "^8.4.0",
+    "pg": "^8.8.0"
+  }
 }

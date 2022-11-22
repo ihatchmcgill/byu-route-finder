@@ -6,8 +6,6 @@ services:
       - "5432:5432" # This is the port postgres uses traditionally
     volumes: # This tells postgres to map the data of the database into a local folder
       - "./db:/var/lib/postgresql/data"
-    env_file: # loads environment variables from this file. You only need it the first time, when the database is built.
-      - .env-db
   adminer: # this is the service that allows us to edit the database with a gui
     image: adminer
     ports:
