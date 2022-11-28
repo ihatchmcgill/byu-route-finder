@@ -2,12 +2,14 @@ const CRED = require('./credentials');
 const MENU = require('./menus')
 const DB = require('./database')
 const API = require('./APIs')
-const {getUserSchedule} = require("./APIs");
+const AWS = require('./aws')
+
 
 
 async function start() {
-    const connected = await DB.testDBConn()
-    if(connected){
+    //const awsCreds = await AWS.testConn()
+    const connectedToDB = await DB.testDBConn('imcgill','sillyGoose!@')//awsCreds[0],awsCreds[1])
+    if(connectedToDB){
         await main().then(() => {})
     }
     else{
@@ -36,7 +38,6 @@ async function main() {
         else{
             console.log('Could not generate starting class routes, no classes found.')
         }
-        //TODO check that the user is in fact a student and these routes have been generated
     }
     else{
         await DB.syncGoals(user)

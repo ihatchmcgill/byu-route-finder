@@ -1,5 +1,5 @@
 const open = require("open");
-const DB = require("./database")
+const DB = require("../database")
 
 class Route {
     constructor(route_id, byu_id,route_locations,week_day,distance_miles,time_minutes) {

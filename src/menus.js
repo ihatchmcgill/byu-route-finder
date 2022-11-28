@@ -1,25 +1,23 @@
 const inquirer = require('inquirer')
-const Building = require('./Building')
-const Step = require('./Step')
-const Route = require('./Route')
+inquirer.registerPrompt('search-list', require('inquirer-search-list'))
+const Building = require('./Classes/Building')
+const Step = require('./Classes/Step')
+const Route = require('./Classes/Route')
 const API = require('./APIs')
 const DB = require('./database')
-const readline = require("readline");
-const {get} = require("html-to-text/lib/helper");
-const {generateRoute} = require("./APIs");
 
 
 
 function displayTitle(){
     console.log('\x1b[34m%s\x1b[0m','░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░\n' +
-        '░     ░░░░░   ░░░░░░   ░   ░░░░░   ░░░░░░░        ░░░░░░░░░     ░░░░░░   ░░░░░   ░           ░         ░░░░░░░        ░░   ░    ░░░░░   ░      ░░░░░         ░        ░░░░\n' +
-        '▒  ▒▒   ▒▒▒▒   ▒▒▒▒   ▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒▒   ▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒   ▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒   ▒  ▒   ▒▒▒   ▒   ▒▒▒   ▒▒   ▒▒▒▒▒▒▒   ▒▒▒▒   ▒▒\n' +
-        '▒  ▒▒▒   ▒▒▒▒   ▒   ▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒▒   ▒▒▒▒   ▒▒▒   ▒▒▒▒▒▒▒▒   ▒   ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒   ▒   ▒   ▒▒   ▒   ▒▒▒▒   ▒   ▒▒▒▒▒▒▒   ▒▒▒▒   ▒▒\n' +
-        '▓      ▓▓▓▓▓▓▓▓   ▓▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓  ▓   ▓▓▓▓▓▓▓   ▓▓▓▓▓▓▓▓   ▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓       ▓▓▓▓▓▓▓▓▓       ▓▓▓   ▓   ▓▓   ▓   ▓   ▓▓▓▓   ▓       ▓▓▓  ▓   ▓▓▓▓▓▓\n' +
-        '▓  ▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓   ▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓▓   ▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓▓▓▓▓▓▓   ▓▓▓▓▓▓▓   ▓   ▓▓▓  ▓   ▓   ▓▓▓▓   ▓   ▓▓▓▓▓▓▓   ▓▓   ▓▓▓▓\n' +
-        '▓  ▓▓▓▓▓  ▓▓▓▓▓   ▓▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓   ▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓▓▓▓▓▓▓   ▓▓▓▓▓▓▓   ▓   ▓▓▓▓  ▓  ▓   ▓▓▓   ▓▓   ▓▓▓▓▓▓▓   ▓▓▓▓   ▓▓\n' +
-        '█    █   ██████   ████████      ██████████   ██████   █████     ████████      ████████   █████         ███████   ███████   █   ██████   █      █████         █   ██████   \n' +
-        '██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████')
+                                    '░     ░░░░░   ░░░░░░   ░   ░░░░░   ░░░░░░░        ░░░░░░░░░     ░░░░░░   ░░░░░   ░           ░         ░░░░░░░        ░░   ░    ░░░░░   ░      ░░░░░         ░        ░░░░\n' +
+                                    '▒  ▒▒   ▒▒▒▒   ▒▒▒▒   ▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒▒   ▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒   ▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒   ▒  ▒   ▒▒▒   ▒   ▒▒▒   ▒▒   ▒▒▒▒▒▒▒   ▒▒▒▒   ▒▒\n' +
+                                    '▒  ▒▒▒   ▒▒▒▒   ▒   ▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒▒   ▒▒▒▒   ▒▒▒   ▒▒▒▒▒▒▒▒   ▒   ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒   ▒   ▒   ▒▒   ▒   ▒▒▒▒   ▒   ▒▒▒▒▒▒▒   ▒▒▒▒   ▒▒\n' +
+                                    '▓      ▓▓▓▓▓▓▓▓   ▓▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓  ▓   ▓▓▓▓▓▓▓   ▓▓▓▓▓▓▓▓   ▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓       ▓▓▓▓▓▓▓▓▓       ▓▓▓   ▓   ▓▓   ▓   ▓   ▓▓▓▓   ▓       ▓▓▓  ▓   ▓▓▓▓▓▓\n' +
+                                    '▓  ▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓   ▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓▓   ▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓▓▓▓▓▓▓   ▓▓▓▓▓▓▓   ▓   ▓▓▓  ▓   ▓   ▓▓▓▓   ▓   ▓▓▓▓▓▓▓   ▓▓   ▓▓▓▓\n' +
+                                    '▓  ▓▓▓▓▓  ▓▓▓▓▓   ▓▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓   ▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓   ▓▓▓▓▓▓▓▓▓▓▓▓▓   ▓▓▓▓▓▓▓   ▓   ▓▓▓▓  ▓  ▓   ▓▓▓   ▓▓   ▓▓▓▓▓▓▓   ▓▓▓▓   ▓▓\n' +
+                                    '█    █   ██████   ████████      ██████████   ██████   █████     ████████      ████████   █████         ███████   ███████   █   ██████   █      █████         █   ██████   \n' +
+                                    '██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████')
 }
 
 async function getGoals(user) {
@@ -111,6 +109,7 @@ async function displayRoutes(user){
         console.clear()
         console.table(user_routes)
         console.log(`You have ${user_routes.length} routes saved.`)
+        await checkGoals(user_routes,user)
     }catch (e) {
         console.error(e)
         return false
@@ -127,6 +126,7 @@ async function displayRoutes(user){
 }
 
 async function createRoute(user){
+
     const options = await inquirer.prompt([
         {
             name: 'choice',
@@ -141,6 +141,8 @@ async function createRoute(user){
         displayTitle()
         return
     }
+
+    //get weekday for the new route
     const getWeekday = await inquirer.prompt([
         {
             name: 'day',
@@ -149,6 +151,8 @@ async function createRoute(user){
             choices: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         }
     ])
+
+    //start adding steps into step array
     let stepArr = []
     let stepOrder = 1
     while(!finished){
@@ -156,21 +160,39 @@ async function createRoute(user){
         let endingBuildingName
         let startBuildingObj
         let endBuildingObj
+
+        //first step will have a start and end location
         if(stepOrder === 1){
             startingBuildingName =  await chooseBuilding('starting')
             endingBuildingName  = await chooseBuilding('destination',startingBuildingName)
         }
+        //all other steps only get a destination
         else{
             startingBuildingName =  stepArr[stepArr.length-1].end_location
             endingBuildingName  = await chooseBuilding('destination',startingBuildingName)
         }
+
+        //get actual building objects using the names chosen by user
         startBuildingObj = await DB.getBuilding(startingBuildingName)
         endBuildingObj = await DB.getBuilding(endingBuildingName)
+
+        //calculate distances using google maps api
         const distanceAndDuration = await API.getDistanceBuildings(startBuildingObj, endBuildingObj)
+
+        //create and add step to the array
         let stepToAdd = new Step(stepOrder, user.userID, null, getWeekday.day, startingBuildingName, endingBuildingName,
             parseFloat(distanceAndDuration.distance), parseFloat(distanceAndDuration.duration))
         stepArr.push(stepToAdd)
+
+        //increment order of the steps
         stepOrder++
+
+        //show current steps
+        console.clear()
+        console.log('Here are your current steps')
+        console.table(stepArr)
+
+
         const complete = await inquirer.prompt([
             {
                 name: 'answer',
@@ -183,9 +205,12 @@ async function createRoute(user){
             finished = true
         }
     }
+
+    //generate route and assign route id to steps
     const newRoute = await API.generateRoute(stepArr,user)
     await DB.insertRoute(newRoute)
     await DB.insertSteps(stepArr)
+
     console.clear()
     displayTitle()
     console.log('Here is your new route!')
@@ -196,16 +221,28 @@ async function modifyRoutes(user){
 
     let finished = false
     while(!finished) {
+        //display routes and returns the routes in an array
         const user_routes = await displayRoutes(user)
+
+        //if routes were actually found
         if (user_routes) {
             const routeMenu = await inquirer.prompt([
                 {
                     name: 'choice',
                     message: 'Please select what you want to do: ',
                     type: 'list',
-                    choices: ['Modify a route', 'Delete a route', 'Open route in browser', 'Back to main menu'],
+                    choices: ['Show route steps','Modify a route', 'Delete a route', 'Open route in browser', 'Back to main menu'],
                 }
             ])
+            if(routeMenu.choice === 'Show route steps'){
+                const index = await getValidIndex(user_routes, 'display')
+                console.clear()
+                displayTitle()
+                console.log('Steps for selected route:')
+                const allSteps = await DB.getSteps(user_routes[index])
+                console.table(allSteps)
+                finished = true
+            }
             if (routeMenu.choice === 'Delete a route') {
                 const index = await getValidIndex(user_routes, 'delete')
                 const validate = await inquirer.prompt([
@@ -232,6 +269,8 @@ async function modifyRoutes(user){
                 }
             }
             if (routeMenu.choice === 'Modify a route') {
+                //1. add a step
+                //2. delete a step
                 const modify = await inquirer.prompt([
                     {
                         name: 'method',
@@ -240,11 +279,12 @@ async function modifyRoutes(user){
                         choices: ['Add a step', 'Delete a step', 'Change weekday', 'Back'],
                     }
                 ])
-
                 if (modify.method === 'Add a step') {
                     const index = await getValidIndex(user_routes, 'modify')
+                    //creates route and gets steps for that route from DB
+
                     const newRouteSteps = await DB.getSteps(await addStepToRoute(user_routes[index], user))
-                    //console.clear()
+
                     //show updated steps
                     console.clear()
                     displayTitle()
@@ -276,7 +316,8 @@ async function modifyRoutes(user){
                         }
                     ])
 
-                    await DB.updateDay(user_routes[index], getWeekday.day)
+                    await DB.updateDayRoute(user_routes[index], getWeekday.day)
+                    await DB.updateDaySteps(user_routes[index], getWeekday.day)
                     console.clear()
                     displayTitle()
                     console.log('Updated route.')
@@ -299,7 +340,10 @@ async function modifyRoutes(user){
                 finished = true
             }
         }
-        finished = true
+        else{
+            //no routes found
+            finished = true
+        }
     }
 }
 
@@ -443,7 +487,6 @@ async function chooseBuilding(message,buildingToRemove){
     if (index > -1) {
         buildingNames.splice(index, 1);
     }
-
     const buildingList = await inquirer.prompt([
         {
             name: 'choice',
@@ -556,6 +599,22 @@ function compareStepOrder(stepA, stepB) {
         return -1
     } else {
         return 1
+    }
+}
+
+async function checkGoals(user_routes,user){
+    let goalsMet = false
+    let numFailing = 0
+    const stepGoal = user.userStepGoal
+    const calorieGoal = user.userCalorieGoal
+
+    for(let i = 0; i < user_routes.length; i++) {
+        if(user_routes[i].distance_steps < stepGoal){
+            console.log(`Warning: Route ${i} doesn't meet your step goal`)
+        }
+        if(user_routes[i].calories_burned < calorieGoal){
+            console.log(`Warning: Route ${i} doesn't meet your calories burned goal`)
+        }
     }
 }
 

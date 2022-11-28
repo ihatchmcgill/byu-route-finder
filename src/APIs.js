@@ -1,6 +1,6 @@
-const Building = require('./Building')
-const Step = require('./Step')
-const Route = require('./Route')
+const Building = require('./Classes/Building')
+const Step = require('./Classes/Step')
+const Route = require('./Classes/Route')
 const DB = require('./database')
 const inquirer = require('inquirer')
 const axios = require('axios')
@@ -201,7 +201,7 @@ async function generateRoute(stepArr,user){
 
 async function getUserSchedule(user){
     const options = {
-        url: `https://api-sandbox.byu.edu:443/domains/legacy/academic/registration/enrolled_classes/v1/byuid/${user.userID}/20232`,
+        url: `https://api-sandbox.byu.edu:443/domains/legacy/academic/registration/enrolled_classes/v1/byuid/${user.userID}/20225`,
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${user.userToken}`

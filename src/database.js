@@ -1,19 +1,22 @@
 const { Client } = require('pg')
-const Step = require('./Step')
-const Table = require('cli-table3')
-const AWSConn = require('./aws')
-const {CREATE_PEOPLE_TABLE, CREATE_USER_ROUTES_TABLE, CREATE_BUILDINGS_TABLE, CREATE_STEPS_TABLE} = require('./SQL')
+const Step = require('./Classes/Step')
+const {CREATE_PEOPLE_TABLE, CREATE_USER_ROUTES_TABLE, CREATE_BUILDINGS_TABLE, CREATE_STEPS_TABLE} = require('../SQL')
 
 
 const clientParams = {
     host: 'localhost',
-    user: 'imcgill', //AWSConn.getAWSParams()[0],
-    password: 'sillyGoose!@', //AWSConn.getAWSParams()[1],
+    user: '',
+    password: '',
     database: 'pgdb',
     port: 5432
 }
+async function setParams(user,pass){
+    clientParams.user = user;
+    clientParams.password = pass
+}
 
-async function testDBConn () {
+async function testDBConn(awsUser,awsPass) {
+    await setParams(awsUser,awsPass)
     let connected = false
     const client = new Client(clientParams)
     try{
@@ -282,7 +285,7 @@ async function getAcronym(buildingName){
     }
 }
 
-async function updateDay(route, day){
+async function updateDayRoute(route, day){
     const client = new Client(clientParams)
     try{
         await client.connect()
@@ -297,6 +300,21 @@ async function updateDay(route, day){
     }
 }
 
+async function updateDaySteps(route,day){
+    const client = new Client(clientParams)
+    try{
+        await client.connect()
+        const queryText = `UPDATE steps SET week_day = $1 WHERE route_id = '${route.route_id}'`
+        const values = [day]
+        await client.query(queryText, values)
+        await client.end()
+    } catch(e) {
+        console.error('Unable to successfully update weekday')
+        await client.end()
+        throw e
+    }
+}
+
 
 module.exports = {testDBConn,findUser,addUser,addBuildings,tableIsEmpty,syncGoals,updateGoals,getBuilding,insertSteps,insertRoute,
-    getRoutesUser,deleteRoute,getSteps,getAllBuildings,getAcronym,updateDay}
+    getRoutesUser,deleteRoute,getSteps,getAllBuildings,getAcronym,updateDayRoute,updateDaySteps}

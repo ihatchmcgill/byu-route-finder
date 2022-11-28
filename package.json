@@ -11,12 +11,13 @@
   "author": "Isaac McGill",
   "license": "Apache-2.0",
   "dependencies": {
-    "aws-sdk": "^2.1232.0",
+    "aws-sdk": "^2.1262.0",
     "axios": "^1.1.3",
     "cli-table3": "^0.6.3",
     "console-read-write": "^0.1.1",
     "html-to-text": "^8.2.1",
     "inquirer": "^8.2.4",
+    "inquirer-search-list": "^1.2.6",
     "open": "^8.4.0",
     "pg": "^8.8.0"
   }
