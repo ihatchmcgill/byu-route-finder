@@ -7,6 +7,7 @@ The BYU Route Finder app is the latest and greatest in BYU technology. With this
 
 
 ## Requirements:
+
 ### API's
 
 * You will need to make sure that you have a valid bearer token to access the following BYU API's:
@@ -18,7 +19,19 @@ The BYU Route Finder app is the latest and greatest in BYU technology. With this
     * Google Distance Matrix: https://maps.googleapis.com/maps/api/distancematrix/json?origins={start.latitude},{start.longitude}&destinations={destination.latitude},{destination.longitude}&mode=walking&key={API_KEY}
 
 Before the program can be used, users must generate a valid bearer token here: https://training-token-generator.byu.edu/# 
+****
+### Install All Necessary Software:
 
+Please ensure that the following programs are correctly installed on your computer:
+
+- [Node.js](https://nodejs.org/en/download/)
+- [Docker](https://docs.docker.com/get-started/overview/)
+****
+### Make sure Docker is running in the background
+
+The program will be hosting the database locally on Docker, so you will need Docker installed and running on your 
+machine before starting the program.
+****
 ### Amazon Web Service
 Log on to [AWS services](https://byulogin.awsapps.com/start#/) and navigate to the BYU AWS Store
 
@@ -32,6 +45,14 @@ Copy Option 1
 
 
 Paste your [AWS](https://byulogin.awsapps.com/start#/) Credentials into the command line of your CLI
+
+
+## Usage
+
+1. Clone this project to your directory of choice with `git clone`
+2. Start the program with `npm run all`. This will extract and start the database and run the program.
+3. Enter your **bearer token** when prompted by the program. 
+4. The welcome screen and main menu will be shown, select options to interact with the program.
 
 
 
