@@ -284,7 +284,7 @@ async function getUserSchedule(user){
         await DB.insertSteps(fridaySteps)
         //console.log(fridayRoute)
     }
-
+    return true
 }
 
 

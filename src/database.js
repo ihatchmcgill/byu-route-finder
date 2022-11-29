@@ -249,6 +249,19 @@ async function deleteRoute(routeToDelete){
     }
 }
 
+async function deleteAllRoutes(user){
+    const client = new Client(clientParams)
+    try{
+        await client.connect()
+        const queryText = `DELETE FROM user_routes WHERE byu_id = '${user.userID}'`
+        await client.query(queryText)
+        await client.end()
+    }catch (e){
+        await client.end()
+        throw e
+    }
+}
+
 async function getSteps(route){
     const client = new Client(clientParams)
     try{
@@ -317,4 +330,4 @@ async function updateDaySteps(route,day){
 
 
 module.exports = {testDBConn,findUser,addUser,addBuildings,tableIsEmpty,syncGoals,updateGoals,getBuilding,insertSteps,insertRoute,
-    getRoutesUser,deleteRoute,getSteps,getAllBuildings,getAcronym,updateDayRoute,updateDaySteps}
+    getRoutesUser,deleteRoute,getSteps,getAllBuildings,getAcronym,updateDayRoute,updateDaySteps,deleteAllRoutes}

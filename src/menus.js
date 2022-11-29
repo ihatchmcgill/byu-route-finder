@@ -231,7 +231,7 @@ async function modifyRoutes(user){
                     name: 'choice',
                     message: 'Please select what you want to do: ',
                     type: 'list',
-                    choices: ['Show route steps','Modify a route', 'Delete a route', 'Open route in browser', 'Back to main menu'],
+                    choices: ['Show route steps','Modify a route', 'Delete a route', 'Delete all routes', 'Open route in browser', 'Back to main menu'],
                 }
             ])
             if(routeMenu.choice === 'Show route steps'){
@@ -263,7 +263,32 @@ async function modifyRoutes(user){
                         finished = true
                     } catch (e) {
                         console.clear()
+                        displayTitle()
                         console.log('Sorry, something went wrong deleting route from the database')
+                        finished = true
+                    }
+                }
+            }
+            if(routeMenu.choice === 'Delete all routes'){
+                const validate = await inquirer.prompt([
+                    {
+                        name: 'answer',
+                        message: `Are you sure you want to delete all your saved routes?`,
+                        type: 'list',
+                        choices: ['Yes', 'No'],
+                    }
+                ])
+                if (validate.answer === 'Yes') {
+                    try {
+                        await DB.deleteAllRoutes(user)
+                        console.clear()
+                        displayTitle()
+                        console.log('Deleted routes successfully')
+                        finished = true
+                    } catch (e) {
+                        console.clear()
+                        displayTitle()
+                        console.log('Sorry, something went wrong deleting routes from the database')
                         finished = true
                     }
                 }
