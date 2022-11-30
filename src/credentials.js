@@ -1,5 +1,4 @@
 const inquirer = require('inquirer')
-const io = require('console-read-write')
 const API = require('./APIs')
 const DB = require('./database')
 

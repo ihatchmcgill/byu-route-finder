@@ -3,9 +3,7 @@ const Step = require('./Classes/Step')
 const Route = require('./Classes/Route')
 const DB = require('./database')
 const AWS = require('./aws')
-const inquirer = require('inquirer')
 const axios = require('axios')
-const {get} = require("html-to-text/lib/helper");
 
 const KM_TO_MILES = 0.621371
 
