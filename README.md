@@ -18,7 +18,7 @@ The BYU Route Finder app is the latest and greatest in BYU technology. With this
 * A Google Maps API is used to fetch route data.
     * Google Distance Matrix: https://maps.googleapis.com/maps/api/distancematrix/json?origins={start.latitude},{start.longitude}&destinations={destination.latitude},{destination.longitude}&mode=walking&key={API_KEY}
 
-Before the program can be used, users must generate a valid bearer token here: https://training-token-generator.byu.edu/# 
+Before the program can be used, users must generate a valid bearer token here: https://training-token-generator.byu.edu 
 ****
 ### Install All Necessary Software:
 
