@@ -2,6 +2,7 @@ const Building = require('./Classes/Building')
 const Step = require('./Classes/Step')
 const Route = require('./Classes/Route')
 const DB = require('./database')
+const AWS = require('./aws')
 const inquirer = require('inquirer')
 const axios = require('axios')
 const {get} = require("html-to-text/lib/helper");
@@ -145,9 +146,12 @@ async function createStepsArr(scheduleBuildingArr,user,weekday){
 
 
 async function getDistanceBuildings(start, destination){
+    const data = await AWS.getAWSParams()
+    const key = data[2]
+
     const config = {
         method: 'get',
-        url: `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${start.latitude},${start.longitude}&destinations=${destination.latitude},${destination.longitude}&mode=walking&key=AIzaSyBaz1xa-mDVKkpE5sKufyr1uvkDCgcjHLw`,
+        url: `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${start.latitude},${start.longitude}&destinations=${destination.latitude},${destination.longitude}&mode=walking&key=${key}`,
         headers: { }
     };
     try{

@@ -7,15 +7,16 @@ const AWS = require('./aws')
 
 
 async function start() {
-    //const awsCreds = await AWS.testConn()
-    const connectedToDB = await DB.testDBConn('imcgill','sillyGoose!@')//awsCreds[0],awsCreds[1])
-    if(connectedToDB){
-        await main().then(() => {})
+    const awsCreds = await AWS.testConn()
+    if(awsCreds){
+        const connectedToDB = await DB.testDBConn(awsCreds[0],awsCreds[1])
+        if(connectedToDB){
+            await main().then(() => {})
+        }
+        else{
+            console.log('An unexpected error occurred connecting to the database. Please try again later. Exiting program...')
+        }
     }
-    else{
-        console.log('An unexpected error occurred. Please try again later. Exiting program...')
-    }
-
 }
 
 

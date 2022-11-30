@@ -1,6 +1,4 @@
 const AWS = require('aws-sdk')
-AWS.config.update({region: 'us-west-2'})
-const ssm = new AWS.SSM()
 let awsUsername
 let awsPassword
 let awsGoogleAPI
@@ -14,26 +12,27 @@ const awsPasswordParams = {
     WithDecryption: true
 }
 const awsGoogleParams = {
-    Name: '/imcgill_technical-challenge/dev/GOOGLE_API_KEY',
+    Name: '/imcgill-technical-challenge/dev/GOOGLE_API_KEY',
     WithDecryption: true
 }
 
 
 async function getAWSParams () {
+    AWS.config.update({region: 'us-west-2'})
+    const ssm = new AWS.SSM()
     try{
-        awsUsername = await ssm.getParameter(awsUsernameParams).promise().then(data => {
-            return data.Parameter.Value
-        })
-        awsPassword = await ssm.getParameter(awsPasswordParams).promise().then(data => {
-            return data.Parameter.Value
-        })
-        awsGoogleAPI = await ssm.getParameter(awsGoogleParams).promise().then(data => {
-            return data.Parameter.Value
-        })
-        //console.log(typeof awsPassword)
+        const dataUser = await ssm.getParameter(awsUsernameParams).promise()
+        awsUsername = dataUser.Parameter.Value
+        //console.log(awsUsername)
+        const dataPass = await ssm.getParameter(awsPasswordParams).promise()
+        awsPassword = dataPass.Parameter.Value
+        //console.log(awsPassword)
+        const dataGoogle = await ssm.getParameter(awsGoogleParams).promise()
+        awsGoogleAPI = dataGoogle.Parameter.Value
+        //console.log(awsGoogleAPI)
         return [awsUsername,awsPassword,awsGoogleAPI]
     } catch (e){
-        console.log(e)
+        console.log('An unexpected error occurred connecting to the AWS parameter store. Please check your credentials and try again. Exiting program...')
     }
 }
 
