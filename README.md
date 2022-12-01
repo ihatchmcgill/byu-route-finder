@@ -39,8 +39,15 @@ Log on to [AWS services](https://byulogin.awsapps.com/start#/) and navigate to t
 
 Under PowerUser, select Command line or programmatic access.
 
-In the terminal before you run the program, type 'aws configure' and then copy and paste in your AWS credentials. This will allow 
+In the terminal before you run the program, type `aws configure` and then copy and paste in your AWS credentials. This will allow 
 you to set the aws_access_key_id and the aws_secret_access_key.
+
+![AWS_CONFIGURE](https://github.com/byu-oit-training/mcgill-technical-challenge/blob/main/awsConfig.PNG?raw=true)
+
+After you have set your Access Key ID and the Secerte Access Key, you will need to set your Session token by 
+typing in `aws configure set aws_session_token` and then your session token.
+
+
 
 
 
