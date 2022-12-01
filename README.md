@@ -44,8 +44,8 @@ you to set the aws_access_key_id and the aws_secret_access_key.
 
 ![AWS_CONFIGURE](https://github.com/byu-oit-training/mcgill-technical-challenge/blob/main/awsConfig.PNG?raw=true)
 
-After you have set your Access Key ID and the Secerte Access Key, you will need to set your Session token by 
-typing in `aws configure set aws_session_token` and then your session token.
+After you have set your Access Key ID and the Secret Access Key, you will 
+need to set your Session Token by typing in `aws configure set aws_session_token` and then your session token.
 
 ![SESSION_TOKEN](https://github.com/byu-oit-training/mcgill-technical-challenge/blob/main/sessionToken.PNG?raw=true)
 
