@@ -37,14 +37,11 @@ Log on to [AWS services](https://byulogin.awsapps.com/start#/) and navigate to t
 
 ![AWS](https://user-images.githubusercontent.com/112526259/198143730-a0a14707-17b7-4698-85f2-0606cc5e5036.PNG)
 
-Under PowerUser, select Command line or programmatic access, then select PowerShell at the top.
+Under PowerUser, select Command line or programmatic access.
 
-Copy Option 1
+In the terminal before you run the program, type 'aws configure' and then copy and paste in your AWS credentials. This will allow 
+you to set the aws_access_key_id and the aws_secret_access_key.
 
-![image](https://user-images.githubusercontent.com/112526259/198144273-f73cc451-9e9a-4724-a685-9880d36b59cb.png)
-
-
-Paste your [AWS](https://byulogin.awsapps.com/start#/) Credentials into the command line of your CLI
 
 
 ## Usage
