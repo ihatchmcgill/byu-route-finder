@@ -1,3 +1,10 @@
+/**
+ * @file File containing the structure of the Route class including all the necessary getters and setters
+ * @author Isaac McGill
+ * Last edited: November 30, 2022
+ */
+
+
 const open = require("open");
 const DB = require("../database")
 
@@ -60,6 +67,12 @@ class Route {
     }
 
 
+    /**
+     * Uses the 'open' package to open a web browser that contains a Google Maps route displaying all the steps in the specified route.
+     * The building names are used to query the database and retrieve latitude and longitude data for each building and construct a URL to open
+     * @param none
+     * @returns none
+     */
     async openRoute(){
         //use url format - https://www.google.com/maps/dir/lat1,long1/lat2,long2/.../data=!4m2!4m1!3e2
 

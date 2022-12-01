@@ -1,3 +1,10 @@
+/**
+ * @file File containing the all the methods necessary to communicate with the database.
+ * @author Isaac McGill
+ * Last edited: November 30, 2022
+ */
+
+
 const { Client } = require('pg')
 const Step = require('./Classes/Step')
 const {CREATE_PEOPLE_TABLE, CREATE_USER_ROUTES_TABLE, CREATE_BUILDINGS_TABLE, CREATE_STEPS_TABLE} = require('../SQL')
@@ -10,11 +17,25 @@ const clientParams = {
     database: 'pgdb',
     port: 5432
 }
+
+/**
+ * Sets the correct username and password to use in the client parameters when connecting to the database. Username and passwords
+ * are collected from the parameter store.
+ * @param username for the database
+ * @param password for the database
+ * @returns none
+ */
 async function setParams(user,pass){
     clientParams.user = user;
     clientParams.password = pass
 }
 
+/**
+ * Tests the connection to the database and creates the table if they don't already exist.
+ * @param awsUser
+ * @param awsPass
+ * @returns true if the program is able to connect to the database, false otherwise.
+ */
 async function testDBConn(awsUser,awsPass) {
     await setParams(awsUser,awsPass)
     let connected = false
@@ -32,6 +53,11 @@ async function testDBConn(awsUser,awsPass) {
     return connected
 }
 
+/**
+ * Creates the database tables if they don't already exist.
+ * @param A client connection to the database
+ * @returns none
+ */
 async function createTables(client) {
     try{
         await client.query(CREATE_PEOPLE_TABLE)
@@ -46,6 +72,11 @@ async function createTables(client) {
     }
 }
 
+/**
+ * Given a specific byuID, the table is queried to see if there exists a user with the byuID as the primary key.
+ * @param byuID
+ * @returns true if there exists a record, otherwise false.
+ */
 async function findUser(byuID){
     let userFound = false;
     const client = new Client(clientParams)
@@ -66,6 +97,13 @@ async function findUser(byuID){
     return userFound
 }
 
+/**
+ * Searches the Buildings table for a record that matches on the primary key: building acronym
+ * @param buildingAcronym
+ * @returns The data for the building found
+ * @throws an error should the query fail
+ */
+
 async function getBuilding(buildingAcronym){
     const client = new Client(clientParams)
     try{
@@ -82,6 +120,11 @@ async function getBuilding(buildingAcronym){
     }
 }
 
+/**
+ * Queries the database to return all the building names.
+ * @param none
+ * @returns all of the names for the buildings in the database
+ */
 async function getAllBuildings(){
     const client = new Client(clientParams)
     try{
@@ -98,7 +141,13 @@ async function getAllBuildings(){
     }
 }
 
-//needed when user logs into the app, a user obj is created but doesn't keep the goals
+/**
+ * Given a specific user, the database is queried to find the user's goals and syncs them to the user that is being used
+ * during the current session of the program.
+ * @param user
+ * @returns none
+ * @throws an error should the query fail
+ */
 async function syncGoals(user){
     const client = new Client(clientParams)
     try{
@@ -116,7 +165,12 @@ async function syncGoals(user){
     }
 }
 
-//Updates goals in database to match the goals of the given user
+/**
+ * Updates goals in database to match the goals of the given user whose goals were collected previously and stored within memory
+ * @param user
+ * @returns none
+ * @throws an error should the query fail
+ */
 async function updateGoals(user){
     const client = new Client(clientParams)
     try{
@@ -132,6 +186,12 @@ async function updateGoals(user){
     }
 }
 
+/**
+ * Given a user object, the method inserts a record into the User table.
+ * @param user
+ * @returns none
+ * @throws an error should the query fail
+ */
 async function addUser(user) {
     const client = new Client(clientParams)
     try{
@@ -147,6 +207,11 @@ async function addUser(user) {
     }
 }
 
+/**
+ * Populates the Buildings table in the database by inserting an array of building objects that is constructed using the API
+ * @param buildingArr
+ * @returns none
+ */
 async function addBuildings(buildingArr){
     const client = new Client(clientParams)
     try{
@@ -162,6 +227,11 @@ async function addBuildings(buildingArr){
     }
 }
 
+/**
+ * Checks to see if a specific table is empty
+ * @param tableName
+ * @returns true if empty, false otherwise.
+ */
 async function tableIsEmpty(tableName){
     let isEmpty = true
     const client = new Client(clientParams)
@@ -182,6 +252,11 @@ async function tableIsEmpty(tableName){
     return isEmpty
 }
 
+/**
+ * Populates a row in the steps table using an array of steps created for a specific route.
+ * @param stepsArr
+ * @returns none
+ */
 async function insertSteps(stepsArr) {
     await insertRoute(stepsArr)
     const client = new Client(clientParams)
@@ -200,13 +275,11 @@ async function insertSteps(stepsArr) {
     }
 }
 
-async function countRoutes (client) {
-    const queryText = 'SELECT COUNT(*) from user_routes'
-    const result = await client.query(queryText)
-    const count = result.rows[0].count
-    return parseInt(count)
-}
-
+/**
+ * Inserts a specific route into the database
+ * @param route
+ * @returns none
+ */
 async function insertRoute(route){
     const client = new Client(clientParams)
     try{
@@ -221,6 +294,12 @@ async function insertRoute(route){
     }
 }
 
+/**
+ * Queries the database find all the routes for a specific user.
+ * @param userID
+ * @returns all of the routes with the given byu_id
+ * @throws an error should the query fail
+ */
 async function getRoutesUser(userID){
     const client = new Client(clientParams)
     try{
@@ -236,6 +315,12 @@ async function getRoutesUser(userID){
     }
 }
 
+/**
+ * Deletes a route from the database
+ * @param routeToDelete
+ * @returns none
+ * @throws an error should the query fail
+ */
 async function deleteRoute(routeToDelete){
     const client = new Client(clientParams)
     try{
@@ -249,6 +334,12 @@ async function deleteRoute(routeToDelete){
     }
 }
 
+/**
+ * Deletes all routes in the database for a specific user
+ * @param user
+ * @returns none
+ * @throws an error should the query fail
+ */
 async function deleteAllRoutes(user){
     const client = new Client(clientParams)
     try{
@@ -262,6 +353,13 @@ async function deleteAllRoutes(user){
     }
 }
 
+/**
+ * Given a specific route, the database is queried and all steps for that route are returned in an array. Creates a step
+ * object for each record found in the table
+ * @param route
+ * @returns an array of Step objects
+ * @throws an error should the query fail
+ */
 async function getSteps(route){
     const client = new Client(clientParams)
     try{
@@ -283,6 +381,12 @@ async function getSteps(route){
     }
 }
 
+/**
+ * Given a specific building name, the method gets the correlating building acronym
+ * @param buildingName
+ * @returns a string with the building acronym
+ * @throws an error should the query fail
+ */
 async function getAcronym(buildingName){
     const client = new Client(clientParams)
     try{
@@ -298,6 +402,13 @@ async function getAcronym(buildingName){
     }
 }
 
+/**
+ * Updates the specified route to have a different week_day property.
+ * @param route
+ * @param day
+ * @returns none
+ * @throws an error should the query fail
+ */
 async function updateDayRoute(route, day){
     const client = new Client(clientParams)
     try{
@@ -313,6 +424,13 @@ async function updateDayRoute(route, day){
     }
 }
 
+/**
+ * Updates the Steps on the specified route to have a different week_day property.
+ * @param route
+ * @param day
+ * @returns none
+ * @throws an error should the query fail
+ */
 async function updateDaySteps(route,day){
     const client = new Client(clientParams)
     try{

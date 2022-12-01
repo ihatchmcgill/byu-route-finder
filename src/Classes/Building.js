@@ -1,3 +1,9 @@
+/**
+ * @file This is the file for the Building class including all the necessary getters and setters
+ * @author Isaac McGill
+ * Last edited: November 30, 2022
+ */
+
 class Building {
     constructor(building_acronym,building_name,latitude,longitude){
         this._building_acronym = building_acronym;

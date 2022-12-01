@@ -1,3 +1,10 @@
+/**
+ * @file File containing all the SQL commands that are used in creating tables
+ * @author Isaac McGill
+ * Last edited: November 30, 2022
+ */
+
+
 const CREATE_PEOPLE_TABLE = 'CREATE TABLE IF NOT EXISTS people (' +
     'byu_id INT PRIMARY KEY, ' +
     'first_name TEXT, ' +

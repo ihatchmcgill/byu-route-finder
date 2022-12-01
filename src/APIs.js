@@ -1,3 +1,10 @@
+/**
+ * @file File containing all the methods that utilize different API calls, including various helper methods.
+ * @author Isaac McGill
+ * Last edited: November 30, 2022
+ */
+
+
 const Building = require('./Classes/Building')
 const Step = require('./Classes/Step')
 const Route = require('./Classes/Route')
@@ -8,6 +15,12 @@ const axios = require('axios')
 const KM_TO_MILES = 0.621371
 
 
+/**
+ * Helper method that creates building objects from the data retrieved from the API and pushes them into an array
+ *
+ * @param data - The result of the Buildings API get request
+ * @returns buildingArr - an array containing Building objects
+ */
 const getBuildingArr = (data) => {
     let buildingArr = []
     for(let i = 0; i < data.length; i++){
@@ -17,6 +30,13 @@ const getBuildingArr = (data) => {
     return buildingArr;
 }
 
+/**
+ * Uses the bearer token to make a get request to the BYU location API to get a list of all building on campus and their
+ * latitude and longitude data
+ * @param token
+ * @returns an array of Building objects
+ * @throws an error should a problem occur while making the API request
+ */
 async function getBuildings(token){
     const options = {
         url: 'https://api-sandbox.byu.edu:443/domains/mobile/location/v2/buildings',
@@ -36,10 +56,12 @@ async function getBuildings(token){
 }
 
 
-
-
-
-
+/**
+ * Uses the OpenID API to get user information based on the bearer token. Creates a variable with the user information.
+ * @param token
+ * @returns a user object
+ * @throws an error should a problem occur while making the API request
+ */
 async function getUserFromToken(token){
     const options = {
         url: 'https://api-sandbox.byu.edu:443/openid-userinfo/v1/userinfo?schema=openid',
@@ -65,6 +87,12 @@ async function getUserFromToken(token){
     }
 }
 
+/**
+ * Helper method that looks at the class list and builds an array of classes that are found on the user. Creates class variables
+ * and stores data including the title, building, daysTaught, and start time.
+ * @param classList - Part of the data returned from the EnrolledService API
+ * @returns classArr - an array of class variables.
+ */
 const parseClassList = (classList) => {
     let classArr = []
     for(let i = 0; i < classList.length; i++) {
@@ -83,6 +111,12 @@ const parseClassList = (classList) => {
     return classArr
 }
 
+/**
+ * Given a list of classes and a specific day, creates an array with every class that takes place on the specific day.
+ * @param classList
+ * @param day
+ * @returns dayClassArr - an array of all the classes with happening on the specific day
+ */
 const buildDaySchedule = (classList, day) => {
     let dayClassArr = []
     for(let i = 0; i < classList.length; i++){
@@ -93,6 +127,19 @@ const buildDaySchedule = (classList, day) => {
     //can be empty if there isn't any classes on that day for student
     return dayClassArr
 }
+
+/**
+ * Defines how classes should be sorted within an array. Sorts the classes by start time and then
+ * constructs a list of buildings that the student must travel to during the day. These buildings
+ * are ordered by start time and placed into an array
+ *
+ * Calls createStepArray to create the steps between the buildings
+ *
+ * @param classList - The list of unsorted classes
+ * @param user
+ * @param weekday - The day of the week that these classes take place
+ * @returns stepsArr - An array of steps between all the buildings on the specified day
+ */
 
 async function sortAndCreateSteps(classList,user,weekday) {
     const compareStartTimes = (classA, classB) => {
@@ -120,6 +167,16 @@ async function sortAndCreateSteps(classList,user,weekday) {
     return stepsArr
 }
 
+
+/**
+ * Helper method that creates Step objects and inserts them into an array. Gets building info from the database by the building name and then calculates
+ * the distance for the step
+ *
+ * @param scheduleBuildingArr - The buildings that mark the start and end of each step
+ * @param user
+ * @param weekday - The day of the week on which the step takes place.
+ * @returns stepsArr
+ */
 async function createStepsArr(scheduleBuildingArr,user,weekday){
     let stepsArr = []
     let stepOrder = 1
@@ -142,7 +199,14 @@ async function createStepsArr(scheduleBuildingArr,user,weekday){
     return stepsArr
 }
 
-
+/**
+ * Uses Google Map's API to get location data for each building through the latitude and longitude coordinates. Converts
+ * distance and duration data into miles and minutes.
+ * @param start - The starting building
+ * @param destination - The destination building
+ * @returns variable containing both distance and duration
+ * @throws an error if the get request fails
+ */
 async function getDistanceBuildings(start, destination){
     const data = await AWS.getAWSParams()
     const key = data[2]
@@ -176,16 +240,21 @@ async function getDistanceBuildings(start, destination){
 
 }
 
+/**
+ * Using an array of Steps, generates a route object and assigns it a unique id.
+ * @param stepArr - The array of steps that make up the route
+ * @param user - The user for which the route belongs
+ * @returns the generate route
+ */
 async function generateRoute(stepArr,user){
     //console.log(stepArr)
     let distanceSum = 0;
     let timeSum = 0;
     let locations = ''
-    let day
+    let day = stepArr[0]
     const newRouteID = Math.random().toString(36).slice(2)
 
     for(let i = 0; i < stepArr.length; i++){
-        day = stepArr[i].week_day
         distanceSum += stepArr[i].distance_miles
         timeSum += stepArr[i].time_minutes
         locations += (stepArr[i].start_location + ',')
@@ -201,6 +270,14 @@ async function generateRoute(stepArr,user){
     return route
 }
 
+/**
+ * The main method called to generate routes for a user based on their class schedule. Calls the EnrolledClasses API from BYU
+ * and creates a route for each day of the week. The routes and the corresponding steps are then inserted into the Database
+ * so long as the number of steps in the route isn't 0
+ *
+ * @param user
+ * @returns True if the user had classes, and they were successfully turned into routes, false otherwise
+ */
 async function getUserSchedule(user){
     const options = {
         url: `https://api-sandbox.byu.edu:443/domains/legacy/academic/registration/enrolled_classes/v1/byuid/${user.userID}/20225`,

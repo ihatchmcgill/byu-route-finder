@@ -1,3 +1,10 @@
+/**
+ * @file File containing the structure for the Step class including all the necessary getters and setters
+ * @author Isaac McGill
+ * Last edited: November 30, 2022
+ */
+
+
 class Step {
 
     constructor(step_order, byu_id, route_id, week_day, start_location, end_location, distance_miles, time_minutes) {

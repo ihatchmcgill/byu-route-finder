@@ -1,3 +1,10 @@
+/**
+ * @file File containing the methods that display the UI to the user and handles their inputs, including various helper methods.
+ * @author Isaac McGill
+ * Last edited: November 30, 2022
+ */
+
+
 const inquirer = require('inquirer')
 inquirer.registerPrompt('search-list', require('inquirer-search-list'))
 const Building = require('./Classes/Building')
@@ -7,7 +14,9 @@ const API = require('./APIs')
 const DB = require('./database')
 
 
-
+/**
+ * Displays the title for the application. Color of choice is blue.
+ */
 function displayTitle(){
     console.log('\x1b[34m%s\x1b[0m','░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░\n' +
                                     '░     ░░░░░   ░░░░░░   ░   ░░░░░   ░░░░░░░        ░░░░░░░░░     ░░░░░░   ░░░░░   ░           ░         ░░░░░░░        ░░   ░    ░░░░░   ░      ░░░░░         ░        ░░░░\n' +
@@ -20,6 +29,12 @@ function displayTitle(){
                                     '██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████')
 }
 
+/**
+ * Prompts the user to input the new goals that they would like to have. Validates that the goal is an appropriate format
+ * After the goals are validated, the user's goals are updated and will be synced later with the database
+ * @param user
+ * @returns none
+ */
 async function getGoals(user) {
     let validStepGoal = false
     let stepGoal
@@ -65,8 +80,10 @@ async function getGoals(user) {
     }
 }
 
-
-
+/**
+ * Displays the main menu options and gets the choice of the user
+ * @returns user's choice
+ */
 async function getUserMenuChoice() {
     const userChoice = await inquirer.prompt([
         {
@@ -79,6 +96,11 @@ async function getUserMenuChoice() {
     return userChoice.menuOption
 }
 
+/**
+ * Displays the user's current goals in a table and gives users the option to modify those goals. The goals are then updated in the database
+ * @param user
+ * @returns none
+ */
 async function modifyGoals(user){
     const goalsTable = {
         "Step Goal": user.userStepGoal,
@@ -102,6 +124,12 @@ async function modifyGoals(user){
     displayTitle()
 }
 
+/**
+ * Given a specific user, all routes saved for the user are displayed. If there are 0 routes, a message is displayed indicating the user needs to
+ * create routes
+ * @param user
+ * @returns the routes for a specified user, false if there aren't any goals saved
+ */
 async function displayRoutes(user){
     let user_routes
     try{
@@ -125,6 +153,13 @@ async function displayRoutes(user){
     return user_routes
 }
 
+
+/**
+ * Prompts users to create a route and takes input from them to build the Route object. Steps are created for the route
+ * as the user selects buildings and both the route and the steps are attached to the user and inserted into the database.
+ * @param user
+ * @returns none
+ */
 async function createRoute(user){
 
     const options = await inquirer.prompt([
@@ -217,6 +252,19 @@ async function createRoute(user){
     console.table(stepArr)
 }
 
+/**
+ * Displays the menu of options that users may select from when modifying a route. Options include
+ * 1. Showing route steps
+ * 2. Deleting routes
+ * 3. Opening routes in the browser
+ * 4. Adding steps to a route
+ * 5. Deleting steps from a route
+ * 6. Edit the weekday for a route
+ *
+ * Helper functions are utilized for most of these choices
+ * @param user
+ * @returns none
+ */
 async function modifyRoutes(user){
 
     let finished = false
@@ -372,8 +420,12 @@ async function modifyRoutes(user){
     }
 }
 
-
-
+/**
+ * Helper function to prompt the user for the index for the array that is passed into the method. Validates that this index is correct
+ * @param user_routes
+ * @param message - The message displayed (Modify or delete)
+ * @returns index
+ */
 async function getValidIndex(user_routes, message){
     let validIndex = false
     while(!validIndex) {
@@ -395,6 +447,16 @@ async function getValidIndex(user_routes, message){
 
 }
 
+/**
+ * Using prompts, data is collected from the user to begin adding steps to the route. Once the user has finished indicating
+ * the new steps, the old route is deleted and a new route is created using these steps and then inserted into the database
+ *
+ * Handles reordering the steps based on the step order provided by the user as well as cascading the proceeding steps to
+ * match start and end locations.
+ * @param routeToModify
+ * @param user
+ * @returns the new route created
+ */
 async function addStepToRoute(routeToModify,user){
     //display steps of route
     console.clear()
@@ -492,10 +554,17 @@ async function addStepToRoute(routeToModify,user){
     await DB.insertRoute(newRoute)
     //console.log('route inserted')
     await DB.insertSteps(stepArr)
-
     return newRoute
 }
 
+
+/**
+ * Gets all the buildings from the database and displays just the names. The user selects the building name for the building
+ * they wish to choose
+ * @param message - (start or destination)
+ * @param buildingToRemove - removes the building from the list of options (so users to have the start and end buildings be the same building)
+ * @returns the acronym for the building selected by the user
+ */
 async function chooseBuilding(message,buildingToRemove){
     //array of objects
     const buildings = await DB.getAllBuildings()
@@ -530,6 +599,16 @@ async function chooseBuilding(message,buildingToRemove){
 
 }
 
+/**
+ * Gets the steps for a specific route and will prompt the user for an index for a step to delete. The step is deleted
+ * from the step array and a new route is created. The old route is deleted and the new one is inserted.
+ *
+ * Handles reordering the steps based on the step order as well as cascading the proceeding steps to
+ * match start and end locations.
+ * @param routeToModify
+ * @param user
+ * @returns newRoute - the new route created
+ */
 async function deleteStepFromRoute(routeToModify,user){
     console.clear()
     console.log('Current steps for selected route:')
@@ -608,6 +687,11 @@ async function deleteStepFromRoute(routeToModify,user){
     return null
 }
 
+/**
+ * Adjusts all the start and end locations in the step array to be correct. Start locations should be the end location of the previous step.
+ * @param stepArr
+ * @returns none
+ */
 async function cascadeStepArr(stepArr){
     //console.log('cascading steps')
     for(let i = 0; i < stepArr.length - 1; i++){
@@ -619,6 +703,12 @@ async function cascadeStepArr(stepArr){
     }
 }
 
+/**
+ * Helper function defining how two different Step objects should be compared using the step order property.
+ * @param stepA
+ * @param stepB
+ * @returns -1 to indicate that stepA comes before stepB, and a 1 for the opposite.
+ */
 function compareStepOrder(stepA, stepB) {
     if (stepA.step_order < stepB.step_order) {
         return -1
@@ -627,9 +717,13 @@ function compareStepOrder(stepA, stepB) {
     }
 }
 
+/**
+ * Checks the step and calories burned data on the routes to show to users which routes don't meet their goals
+ * @param user_routes - the routes for the given user
+ * @param user - the user for whose goals we are checking
+ * @returns none
+ */
 async function checkGoals(user_routes,user){
-    let goalsMet = false
-    let numFailing = 0
     const stepGoal = user.userStepGoal
     const calorieGoal = user.userCalorieGoal
 
