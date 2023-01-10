@@ -45,25 +45,36 @@ async function start() {
 async function main() {
     console.clear()
     let user = await CRED.getUserCreds()
+
+    //check if building table is empty, populate it
+    if(await DB.tableIsEmpty("buildings")){
+        const buildings = await API.getBuildings(user.userToken)
+        await DB.addBuildings(buildings)
+    }
+
     const userExists = await DB.findUser(user.userID)
     console.clear()
     if(!userExists) {
-        console.log(`Welcome ${user.userFirst} to the Route Finder app!`)
-        await MENU.getGoals(user)
-        console.clear()
-        await DB.addUser(user)
+        try{
+            console.log(`Welcome ${user.userFirst} to the Route Finder app!`)
+            await MENU.getGoals(user)
+            console.clear()
+            await DB.addUser(user)
 
-        //returns false is there are no classes in their schedule (not a student)
-        const userSchedule = await API.getUserSchedule(user)
-        if(userSchedule){
-            console.log('Starting routes have been generated for you based your current class schedule!')
-        }
-        else{
-            console.log('Could not generate starting class routes, no classes found.')
+            //returns false is there are no classes in their schedule (not a student)
+            const userSchedule = await API.getUserSchedule(user)
+            if(userSchedule){
+                console.log('Starting routes have been generated for you based your current class schedule!')
+            }
+            else{
+                console.log('Could not generate starting class routes, no classes found.')
+            }
+        }catch(e){
+            console.log("Starting routes could not be created for new user.")
         }
     }
     else{
-        await DB.syncGoals(user)
+        await DB.getGoalsfromDB(user)
         console.log(`Welcome back ${user.userFirst} to the Route Finder app!`)
     }
     MENU.displayTitle()

@@ -12,7 +12,7 @@ const DB = require('./database')
 const AWS = require('./aws')
 const axios = require('axios')
 
-const KM_TO_MILES = 0.621371
+
 
 
 /**
@@ -163,8 +163,14 @@ async function sortAndCreateSteps(classList,user,weekday) {
 
     }
     const scheduleBuildingArr = buildingString.split(',')
-    const stepsArr = await createStepsArr(scheduleBuildingArr,user,weekday)
-    return stepsArr
+    try{
+        const stepsArr = await createStepsArr(scheduleBuildingArr,user,weekday)
+        return stepsArr
+    }catch (e){
+        throw e
+    }
+
+
 }
 
 
@@ -187,14 +193,18 @@ async function createStepsArr(scheduleBuildingArr,user,weekday){
         //start getting data for Step
         try{
             const distanceAndDuration = await getDistanceBuildings(startBuilding,destinationBuilding)
-            const stepToAdd = new Step(stepOrder,user.userID,null, weekday, startBuilding.building_acronym, destinationBuilding.building_acronym,
-                parseFloat(distanceAndDuration.distance), parseFloat(distanceAndDuration.duration))
-            stepsArr.push(stepToAdd)
+            //if distance = 0, two classes are in the same building. Don't create a step
+            if(parseFloat(distanceAndDuration.distance) != 0){
+                const stepToAdd = new Step(stepOrder,user.userID,null, weekday, startBuilding.building_acronym, destinationBuilding.building_acronym,
+                    parseFloat(distanceAndDuration.distance), parseFloat(distanceAndDuration.duration))
+                stepsArr.push(stepToAdd)
+                stepOrder++
+            }
         }catch(e){
             console.log("Cannot create step array")
+            throw e
             return
         }
-        stepOrder++
     }
     return stepsArr
 }
@@ -213,7 +223,7 @@ async function getDistanceBuildings(start, destination){
 
     const config = {
         method: 'get',
-        url: `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${start.latitude},${start.longitude}&destinations=${destination.latitude},${destination.longitude}&mode=walking&key=${key}`,
+        url: `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${start.latitude},${start.longitude}&destinations=${destination.latitude},${destination.longitude}&mode=walking&key=` + key,
         headers: { }
     };
     try{
@@ -221,6 +231,7 @@ async function getDistanceBuildings(start, destination){
         const distanceKM = response.data.rows[0].elements[0].distance.value
         let duration = response.data.rows[0].elements[0].duration.value
         //distance and duration values are in meters and seconds, so convert them here
+        const KM_TO_MILES = 0.621371
         const distanceMI = function(distance) {
             distance /= 1000
             distance *= KM_TO_MILES
@@ -251,10 +262,11 @@ async function generateRoute(stepArr,user){
     let distanceSum = 0;
     let timeSum = 0;
     let locations = ''
-    let day = stepArr[0]
+    let day
     const newRouteID = Math.random().toString(36).slice(2)
 
     for(let i = 0; i < stepArr.length; i++){
+        day = stepArr[i].week_day
         distanceSum += stepArr[i].distance_miles
         timeSum += stepArr[i].time_minutes
         locations += (stepArr[i].start_location + ',')
@@ -278,24 +290,51 @@ async function generateRoute(stepArr,user){
  * @param user
  * @returns True if the user had classes, and they were successfully turned into routes, false otherwise
  */
+
+const getYearTermHelper = () => {
+    const currDate = new Date
+    const currYear = currDate.getFullYear()
+    const currMonth = currDate.getMonth()
+    let term
+
+    if(0 <= currMonth < 4){
+        //winter semester
+        term = 1
+    }
+    else if(4 <= currMonth < 6){
+        //spring
+        term = 3
+    }
+    else if(6 <= currMonth < 8){
+        //summer
+        term = 4
+    }
+    else{
+        //fall
+        term = 5
+    }
+    return (currYear.toString() + term.toString())
+}
+
+
+
+
 async function getUserSchedule(user){
+    let yearTerm = getYearTermHelper()
     const options = {
-        url: `https://api-sandbox.byu.edu:443/domains/legacy/academic/registration/enrolled_classes/v1/byuid/${user.userID}/20225`,
+        url: `https://api-sandbox.byu.edu:443/domains/legacy/academic/registration/enrolled_classes/v1/byuid/${user.userID}/${yearTerm}`,
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${user.userToken}`
         }
     }
 
-
     let classInfo
-    //This API is pretty unreliable, half the time it works.
     try {
         const response = await axios(options)
         classInfo = response.data.EnrolledClassesService.response.class_list
     }catch(e) {
         console.error('Error occurred while attempting to make schedule API request, unable to generate starting routes')
-        console.error(e)
         return false
     }
 
@@ -324,47 +363,36 @@ async function getUserSchedule(user){
 
     try{
         //sort classes, get building list and create steps to add to DB
+
         mondaySteps = await sortAndCreateSteps(mondayClasses,user,"Monday")
         tuesdaySteps = await sortAndCreateSteps(tuesdayClasses,user,"Tuesday")
         wednesdaySteps = await sortAndCreateSteps(wednesdayClasses,user,"Wednesday")
         thursdaySteps = await sortAndCreateSteps(thursdayClasses,user,"Thursday")
         fridaySteps = await sortAndCreateSteps(fridayClasses,user,"Friday")
+
+        await generateAndInsertRoute(mondaySteps,user)
+        await generateAndInsertRoute(tuesdaySteps,user)
+        await generateAndInsertRoute(wednesdaySteps,user)
+        await generateAndInsertRoute(thursdaySteps,user)
+        await generateAndInsertRoute(fridaySteps,user)
+        return true
     }catch (e) {
-        console.error("An error occurred while creating steps")
+        throw e
+        return false
     }
 
-    if(mondaySteps.length !== 0){
-        const mondayRoute = await generateRoute(mondaySteps,user)
-        await DB.insertRoute(mondayRoute)
-        await DB.insertSteps(mondaySteps)
-        //console.log(mondayRoute)
-    }
-    if(tuesdaySteps.length !== 0){
-        const tuesdayRoute = await generateRoute(tuesdaySteps,user)
-        await DB.insertRoute(tuesdayRoute)
-        await DB.insertSteps(tuesdaySteps)
-        //console.log(tuesdayRoute)
-    }
-    if(wednesdaySteps.length !== 0){
-        const wednesdayRoute = await generateRoute(wednesdaySteps,user)
-        await DB.insertRoute(wednesdayRoute)
-        await DB.insertSteps(wednesdaySteps)
-        //console.log(wednesdayRoute)
-    }
-    if(thursdaySteps.length !== 0){
-        const thursdayRoute = await generateRoute(thursdaySteps,user)
-        await DB.insertRoute(thursdayRoute)
-        await DB.insertSteps(thursdaySteps)
-        //console.log(thursdayRoute)
-    }
-    if(fridaySteps.length !== 0){
-        const fridayRoute = await generateRoute(fridaySteps,user)
-        await DB.insertRoute(fridayRoute)
-        await DB.insertSteps(fridaySteps)
-        //console.log(fridayRoute)
-    }
-    return true
+
 }
+
+async function generateAndInsertRoute(stepArr,user){
+    if(stepArr.length !== 0){
+        const route = await generateRoute(stepArr,user)
+        await DB.insertRoute(route)
+        await DB.insertSteps(stepArr)
+    }
+}
+
+
 
 
 module.exports = {getUserFromToken,getBuildings,getUserSchedule,getDistanceBuildings,generateRoute}

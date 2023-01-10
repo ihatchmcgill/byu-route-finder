@@ -48,6 +48,7 @@ async function testDBConn(awsUser,awsPass) {
         connected = true
     } catch (e) {
         await client.end()
+        console.log(e)
         console.error('Unable to connect to local database.')
     }
     return connected
@@ -148,7 +149,7 @@ async function getAllBuildings(){
  * @returns none
  * @throws an error should the query fail
  */
-async function syncGoals(user){
+async function getGoalsfromDB(user){
     const client = new Client(clientParams)
     try{
         await client.connect()
@@ -202,6 +203,7 @@ async function addUser(user) {
         await client.end()
     } catch (e){
         await client.end()
+        console.log(e)
         console.error("Unable to add user into table")
         throw e
     }
@@ -447,5 +449,5 @@ async function updateDaySteps(route,day){
 }
 
 
-module.exports = {testDBConn,findUser,addUser,addBuildings,tableIsEmpty,syncGoals,updateGoals,getBuilding,insertSteps,insertRoute,
+module.exports = {testDBConn,findUser,addUser,addBuildings,tableIsEmpty,getGoalsfromDB,updateGoals,getBuilding,insertSteps,insertRoute,
     getRoutesUser,deleteRoute,getSteps,getAllBuildings,getAcronym,updateDayRoute,updateDaySteps,deleteAllRoutes}

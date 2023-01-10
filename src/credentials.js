@@ -30,6 +30,7 @@ async function getUserCreds () {
             user = await API.getUserFromToken(userToken.tokenPrompt)
             valid = true
             if(await DB.tableIsEmpty('buildings')){
+
                 //gets and adds buildings to database
                 const buildings = API.getBuildings(userToken.tokenPrompt)
                 await DB.addBuildings(buildings)
