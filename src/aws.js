@@ -3,11 +3,10 @@
  * @author Isaac McGill
  * Last edited: November 30, 2022
  */
-
 const AWS = require('aws-sdk')
-let awsUsername
-let awsPassword
-let awsGoogleAPI
+
+
+
 
 const awsUsernameParams = {
     Name: '/imcgill-technical-challenge/dev/DB_USERNAME',
@@ -29,6 +28,9 @@ const awsGoogleParams = {
  * @returns An array containing all the necessary values for database credentials and API keys
  */
 async function getAWSParams () {
+    let awsUsername
+    let awsPassword
+    let awsGoogleAPI
     AWS.config.update({region: 'us-west-2'})
     const ssm = new AWS.SSM()
     try{

@@ -22,11 +22,14 @@ const axios = require('axios')
  * @returns buildingArr - an array containing Building objects
  */
 const getBuildingArr = (data) => {
-    let buildingArr = []
-    for(let i = 0; i < data.length; i++){
-        let currBuilding = new Building(data[i].acronym,data[i].name,data[i].latitude,data[i].longitude)
-        buildingArr.push(currBuilding)
-    }
+
+    const buildingArr = data.map(currBuilding => new Building(currBuilding.acronym,currBuilding.name,currBuilding.latitude, currBuilding.longitude))
+
+    // let buildingArr = []
+    // for(let i = 0; i < data.length; i++){
+    //     let currBuilding = new Building(data[i].acronym,data[i].name,data[i].latitude,data[i].longitude)
+    //     buildingArr.push(currBuilding)
+    // }
     return buildingArr;
 }
 
@@ -94,20 +97,26 @@ async function getUserFromToken(token){
  * @returns classArr - an array of class variables.
  */
 const parseClassList = (classList) => {
-    let classArr = []
-    for(let i = 0; i < classList.length; i++) {
-        //TODO Filter for online classes - What field to read off of?
 
-        //if(!onlineClass){
-        let currClass = {
-            classTitle: classList[i].course_title,
-            building: classList[i].schedule[0].building,
-            daysTaught: classList[i].schedule[0].days_taught,
-            startTime: classList[i].schedule[0].begin_time,
+    let newClass;
+    const classArr = classList.map(currClass => newClass = {
+            classTitle: currClass.course_title,
+            building: currClass.schedule[0].building,
+            daysTaught: currClass.schedule[0].days_taught,
+            startTime: currClass.schedule[0].begin_time,
         }
-        classArr.push(currClass)
-    //}
-    }
+    )
+
+    // let classArr = []
+    // for(let i = 0; i < classList.length; i++) {
+    //     let currClass = {
+    //         classTitle: classList[i].course_title,
+    //         building: classList[i].schedule[0].building,
+    //         daysTaught: classList[i].schedule[0].days_taught,
+    //         startTime: classList[i].schedule[0].begin_time,
+    //     }
+    //     classArr.push(currClass)
+    // }
     return classArr
 }
 
@@ -118,14 +127,16 @@ const parseClassList = (classList) => {
  * @returns dayClassArr - an array of all the classes with happening on the specific day
  */
 const buildDaySchedule = (classList, day) => {
-    //TODO: USE FILTER
-    let dayClassArr = []
-    for(let i = 0; i < classList.length; i++){
-        if(classList[i].daysTaught.includes(day)){
-            dayClassArr.push(classList[i])
-        }
-    }
-    //can be empty if there isn't any classes on that day for student
+
+    const dayClassArr = classList.filter(currClass => currClass.daysTaught.includes(day))
+
+    // let dayClassArr = []
+    // for(let i = 0; i < classList.length; i++){
+    //     if(classList[i].daysTaught.includes(day)){
+    //         dayClassArr.push(classList[i])
+    //     }
+    // }
+    // //can be empty if there isn't any classes on that day for student
     return dayClassArr
 }
 
@@ -155,6 +166,7 @@ async function sortAndCreateSteps(classList,user,weekday) {
     //console.log(classList)
 
     let buildingString = ''
+    //use for loop because the index is important
     for(let i = 0; i < classList.length;i++){
         if(i !== classList.length - 1){
             buildingString += classList[i].building.toUpperCase() + ','
@@ -277,6 +289,7 @@ async function generateRoute(stepArr,user){
     let day
     const newRouteID = Math.random().toString(36).slice(2)
 
+    //need to know index? not sure forEach would work here
     for(let i = 0; i < stepArr.length; i++){
         day = stepArr[i].week_day
         distanceSum += stepArr[i].distance_miles

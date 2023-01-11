@@ -570,10 +570,13 @@ async function chooseBuilding(message,buildingToRemove){
     const buildings = await DB.getAllBuildings()
 
     //pull out just the names of buildings
-    let buildingNames = []
-    for(let i = 0; i < buildings.length;i++){
-        buildingNames.push(buildings[i].building_name)
-    }
+
+    let buildingNames = buildings.map(currBuilding => currBuilding.building_name)
+
+    // let buildingNames = []
+    // for(let i = 0; i < buildings.length;i++){
+    //     buildingNames.push(buildings[i].building_name)
+    // }
     //sort names
     buildingNames.sort();
 
