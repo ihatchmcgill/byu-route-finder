@@ -84,17 +84,19 @@ class Route {
         const buildingNames = this.route_locations.split(',')
 
         let dataForUrl = ''
-        for(let i = 0; i < buildingNames.length; i++){
-            const building = await DB.getBuilding(buildingNames[i])
-            dataForUrl += (building.latitude + ',' + building.longitude + '/')
+        try{
+            for(let i = 0; i < buildingNames.length; i++){
+                const building = await DB.getBuilding(buildingNames[i])
+                dataForUrl += (building.latitude + ',' + building.longitude + '/')
+            }
+
+            open(urlStart + dataForUrl + endingData)
+            console.log('Browser opened')
+        }catch (e){
+            console.log("Unable to open browser. Please try again.")
         }
 
-        open(urlStart + dataForUrl + endingData)
-        console.log('Browser opened')
     }
-
-
-
 }
 
 
