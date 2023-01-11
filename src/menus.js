@@ -90,7 +90,7 @@ async function getUserMenuChoice() {
         name: 'menuOption',
         message: 'Please select an option from the menu below: ',
         type: 'list',
-        choices: ['View/Modify goals', 'Create a new route', 'View/Modify existing routes', 'Exit'],
+        choices: ['View/Modify goals', 'Create a new route', 'View/Modify existing routes', 'Regenerate class routes', 'Exit'],
         }
     ])
     return userChoice.menuOption
@@ -349,7 +349,7 @@ async function modifyRoutes(user){
                         name: 'method',
                         message: `How do you want to modify the route?`,
                         type: 'list',
-                        choices: ['Add a step', 'Delete a step', 'Change weekday', 'Back'],
+                        choices: ['Add a step', 'Delete a step','Change weekday', 'Back'],
                     }
                 ])
                 if (modify.method === 'Add a step') {

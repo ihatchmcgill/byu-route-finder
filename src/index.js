@@ -94,6 +94,21 @@ async function main() {
                 console.clear()
                 await MENU.modifyRoutes(user)
                 break
+            case 'Regenerate class routes':
+                console.clear()
+                try{
+                    const valid = await API.getUserSchedule(user)
+                    if(valid){
+                        console.log('Starting routes have been generated for you based your current class schedule!')
+                    }
+                    else{
+                        console.log('Could not generate starting class routes, no classes found.')
+                    }
+                }catch (e) {
+                    console.log("An error occurred, please try again.")
+                }
+                MENU.displayTitle()
+                break
             case "Exit":
                 console.clear()
                 exit = true

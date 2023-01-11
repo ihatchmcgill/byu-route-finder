@@ -118,6 +118,7 @@ const parseClassList = (classList) => {
  * @returns dayClassArr - an array of all the classes with happening on the specific day
  */
 const buildDaySchedule = (classList, day) => {
+    //TODO: USE FILTER
     let dayClassArr = []
     for(let i = 0; i < classList.length; i++){
         if(classList[i].daysTaught.includes(day)){
@@ -186,15 +187,26 @@ async function sortAndCreateSteps(classList,user,weekday) {
 async function createStepsArr(scheduleBuildingArr,user,weekday){
     let stepsArr = []
     let stepOrder = 1
-    for(let i = 0; i < scheduleBuildingArr.length - 1; i++){
-        let startBuilding = await DB.getBuilding(scheduleBuildingArr[i]) //LSB
-        let destinationBuilding = await DB.getBuilding(scheduleBuildingArr[i+1])  //JKB
-
+    let i = 0
+    if(scheduleBuildingArr.length === 1) {
+        i -= 1
+    }
+    for(i; i < scheduleBuildingArr.length - 1; i++){
+        let startBuilding
+        let destinationBuilding
+        if(scheduleBuildingArr.length === 1) {
+            startBuilding = await DB.getBuilding(scheduleBuildingArr[0])
+            destinationBuilding = await DB.getBuilding('HBLL')
+        }
+        else {
+            startBuilding = await DB.getBuilding(scheduleBuildingArr[i])
+            destinationBuilding = await DB.getBuilding(scheduleBuildingArr[i + 1])  //JKB
+        }
         //start getting data for Step
         try{
             const distanceAndDuration = await getDistanceBuildings(startBuilding,destinationBuilding)
             //if distance = 0, two classes are in the same building. Don't create a step
-            if(parseFloat(distanceAndDuration.distance) != 0){
+            if(parseFloat(distanceAndDuration.distance) !== 0){
                 const stepToAdd = new Step(stepOrder,user.userID,null, weekday, startBuilding.building_acronym, destinationBuilding.building_acronym,
                     parseFloat(distanceAndDuration.distance), parseFloat(distanceAndDuration.duration))
                 stepsArr.push(stepToAdd)
