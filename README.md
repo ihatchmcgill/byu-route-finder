@@ -54,7 +54,7 @@ need to set your Session Token by typing in `aws configure set aws_session_token
 ## Usage
 
 1. Clone this project to your directory of choice with `git clone`
-2. `cd` into the project with `cd mcgill-technical-challenge`
+2. `cd` into the project with `cd mcgill-technical-challenge/`
 3. Start the program with `npm run all`. This will extract and start the database and run the program.
 4. Enter your **bearer token** when prompted by the program. 
 5. The welcome screen and main menu will be shown, select options to interact with the program.
