@@ -7,6 +7,7 @@
     "shutdown": "docker-compose down",
     "all": "npm install && npm run extract-db && npm run database && npm run start",
     "extract-db": "tar.exe -xf db.zip",
+    "compress-db": "tar.exe -acf db.zip db",
     "install": "npm install aws-sdk && npm install open && npm install pg && npm install --save inquirer@^8.0.0 && npm install axios",
     "start": "node src/index.js"
   },
