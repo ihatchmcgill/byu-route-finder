@@ -218,11 +218,21 @@ async function addBuildings(buildingArr){
     const client = new Client(clientParams)
     try{
         await client.connect()
-        for(let i = 0; i < buildingArr.length; i++){
+
+        for(const currBuilding of buildingArr) {
             const queryText = 'INSERT INTO buildings (building_acronym,building_name,latitude,longitude) VALUES ($1,$2,$3,$4)'
-            const values = [buildingArr[i].building_acronym, buildingArr[i].building_name,buildingArr[i].latitude,buildingArr[i].longitude]
-            await client.query(queryText,values)
+            const values = [currBuilding.building_acronym, currBuilding.building_name, currBuilding.latitude, currBuilding.longitude]
+            await client.query(queryText, values)
         }
+
+        // for(let i = 0; i < buildingArr.length; i++){
+        //
+        // }
+
+        //Remove "Former Presidents' Home" (String causes program to crash)
+        const queryText = 'DELETE FROM buildings WHERE building_acronym = \'FPH\''
+        await client.query(queryText)
+
     }catch(e){
         console.error("Unable to populate buildings table")
         await client.end()
