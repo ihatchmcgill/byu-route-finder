@@ -70,6 +70,7 @@ async function main() {
                 console.log('Could not generate starting class routes, no classes found.')
             }
         }catch(e){
+            console.clear()
             console.log("Starting routes could not be created for new user.")
         }
     }

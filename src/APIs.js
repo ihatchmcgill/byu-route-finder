@@ -10,6 +10,7 @@ const Step = require('./Classes/Step')
 const Route = require('./Classes/Route')
 const DB = require('./database')
 const AWS = require('./aws')
+const MENU = require('./menus')
 const axios = require('axios')
 
 
@@ -207,8 +208,9 @@ async function createStepsArr(scheduleBuildingArr,user,weekday){
         let startBuilding
         let destinationBuilding
         if(scheduleBuildingArr.length === 1) {
-            startBuilding = await DB.getBuilding(scheduleBuildingArr[0])
-            destinationBuilding = await DB.getBuilding('HBLL')
+            console.log(`Looks like you only have one class on ${weekday}, please select a starting point for your route.`)
+            startBuilding = await DB.getBuilding(await MENU.chooseBuilding("starting"))
+            destinationBuilding = await DB.getBuilding(scheduleBuildingArr[0])
         }
         else {
             startBuilding = await DB.getBuilding(scheduleBuildingArr[i])

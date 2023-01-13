@@ -36,48 +36,46 @@ function displayTitle(){
  * @returns none
  */
 async function getGoals(user) {
-    let validStepGoal = false
-    let stepGoal
-    let calorieGoal
-    while(!validStepGoal){
-        stepGoal = await inquirer.prompt([
+    let stepGoal = await inquirer.prompt([
             {
                 name: 'stepGoal',
                 message: 'Please input your daily step goal, or enter 0 to skip this part: ',
-                type: 'number'
+                type: 'input',
+                validate: (answer) => {
+                    answer = parseInt(answer)
+                    if (Number.isInteger(parseInt(answer)) && answer >= 0) {
+                        //validStepGoal = true
+                        user.userStepGoal = answer
+                        return true
+                    }
+                    else{
+                        return 'Sorry, please input a positive integer.'
+                    }
+                }
             }
         ])
-        if(Number.isInteger(stepGoal.stepGoal) && stepGoal.stepGoal >= 0){
-            validStepGoal = true
-            if(stepGoal.stepGoal !== 0){
-                console.log(`Updated your current daily step goal to: ${stepGoal.stepGoal}`)
-                user.userStepGoal = stepGoal.stepGoal
+    console.log(`Updated your current daily step goal`)
+
+
+    let calorieGoal = await inquirer.prompt([
+        {
+            name: 'calorieGoal',
+            message: 'Please input your daily calories burned goal, or enter 0 to skip this part: ',
+            type: 'input',
+            validate: (answer) => {
+                answer = parseInt(answer)
+                if (Number.isInteger(answer) && answer >= 0) {
+                    //validCalorieGoal = true
+                    user.userCalorieGoal = answer
+                    return true
+                }
+                else{
+                    return 'Sorry, please input a positive integer.'
+                }
             }
         }
-        else{
-            console.log('Sorry, please input a positive integer.')
-        }
-    }
-    let validCalorieGoal = false
-    while(!validCalorieGoal){
-        calorieGoal = await inquirer.prompt([
-            {
-                name: 'calorieGoal',
-                message: 'Please input your daily calories burned goal, or enter 0 to skip this part: ',
-                type: 'number'
-            }
-        ])
-        if(Number.isInteger(calorieGoal.calorieGoal) && calorieGoal.calorieGoal >= 0){
-            validCalorieGoal = true
-            if(calorieGoal.calorieGoal !== 0){
-                console.log(`Updated your current goal for daily calories burned to: ${calorieGoal.calorieGoal}`)
-                user.userCalorieGoal = calorieGoal.calorieGoal
-            }
-        }
-        else{
-            console.log('Sorry, please input a positive integer.')
-        }
-    }
+    ])
+    console.log(`Updated your current goal for daily calories burned`)
 }
 
 /**
@@ -135,6 +133,7 @@ async function displayRoutes(user){
     try{
         user_routes = await DB.getRoutesUser(user.userID)
         console.clear()
+        displayTitle()
         console.table(user_routes)
         console.log(`You have ${user_routes.length} routes saved.`)
         await checkGoals(user_routes,user)
@@ -268,11 +267,12 @@ async function createRoute(user){
 async function modifyRoutes(user){
 
     let finished = false
+
+    let user_routes = await displayRoutes(user)
     while(!finished) {
-        //display routes and returns the routes in an array
-        const user_routes = await displayRoutes(user)
 
         //if routes were actually found
+
         if (user_routes) {
             const routeMenu = await inquirer.prompt([
                 {
@@ -283,15 +283,16 @@ async function modifyRoutes(user){
                 }
             ])
             if(routeMenu.choice === 'Show route steps'){
+                user_routes = await displayRoutes(user)
                 const index = await getValidIndex(user_routes, 'display')
                 console.clear()
                 displayTitle()
                 console.log('Steps for selected route:')
                 const allSteps = await DB.getSteps(user_routes[index])
                 console.table(allSteps)
-                finished = true
             }
             if (routeMenu.choice === 'Delete a route') {
+                user_routes = await displayRoutes(user)
                 const index = await getValidIndex(user_routes, 'delete')
                 const validate = await inquirer.prompt([
                     {
@@ -308,7 +309,12 @@ async function modifyRoutes(user){
                         console.clear()
                         displayTitle()
                         console.log('Deleted route successfully')
-                        finished = true
+                        if(user_routes.length === 0){
+                            console.log("deleted last route")
+                            finished = true
+                        }else{
+                            user_routes = await displayRoutes(user)
+                        }
                     } catch (e) {
                         console.clear()
                         displayTitle()
@@ -342,6 +348,7 @@ async function modifyRoutes(user){
                 }
             }
             if (routeMenu.choice === 'Modify a route') {
+                user_routes = await displayRoutes(user)
                 //1. add a step
                 //2. delete a step
                 const modify = await inquirer.prompt([
@@ -363,10 +370,11 @@ async function modifyRoutes(user){
                     displayTitle()
                     console.log('Here is your new route!')
                     console.table(newRouteSteps)
-                    finished = true
                 }
                 if (modify.method === 'Delete a step') {
                     const index = await getValidIndex(user_routes, 'modify')
+                    console.log("test for route at index: " + index + "with route:")
+                    console.table(user_routes[index])
                     const newRoute = await deleteStepFromRoute(user_routes[index], user)
                     if (newRoute !== null) {
                         const newRouteSteps = await DB.getSteps(newRoute)
@@ -394,10 +402,11 @@ async function modifyRoutes(user){
                     console.clear()
                     displayTitle()
                     console.log('Updated route.')
-                    finished = true
+                    user_routes = await displayRoutes(user)
                 }
             }
             if (routeMenu.choice === 'Open route in browser') {
+                user_routes = await displayRoutes(user)
                 //get route index
                 const index = await getValidIndex(user_routes, 'display')
                 const routeToDisplay = new Route(user_routes[index].route_id, user_routes[index].byu_id, user_routes[index].route_locations, user_routes[index].week_day,
@@ -405,7 +414,7 @@ async function modifyRoutes(user){
                 console.clear()
                 displayTitle()
                 await routeToDisplay.openRoute()
-                finished = true
+                user_routes = await displayRoutes(user)
             }
             if (routeMenu.choice === 'Back to main menu') {
                 console.clear()
@@ -427,24 +436,25 @@ async function modifyRoutes(user){
  * @returns index
  */
 async function getValidIndex(user_routes, message){
-    let validIndex = false
-    while(!validIndex) {
-        const chooseIndex = await inquirer.prompt([
-            {
-                name: 'index',
-                message: `Please input the index of the route you wish to ${message}: `,
-                type: 'number',
+    let index
+    const chooseIndex = await inquirer.prompt([
+        {
+            name: 'index',
+            message: `Please input the index of the route you wish to ${message}: `,
+            type: 'input',
+            validate: (answer) => {
+                answer = parseInt(answer)
+                if (answer < 0 || answer >= user_routes.length || !Number.isInteger(answer)) {
+                    return 'Sorry, please enter a valid index.'
+                }
+                else{
+                    index = answer
+                    return true
+                }
             }
-        ])
-        //check that input isn't out of bounds
-        if (chooseIndex.index < 0 || chooseIndex.index >= user_routes.length || !Number.isInteger(chooseIndex.index)) {
-            console.log('Sorry, please enter a valid index.')
         }
-        else{
-            return chooseIndex.index
-        }
-    }
-
+    ])
+    return index
 }
 
 /**
@@ -458,44 +468,45 @@ async function getValidIndex(user_routes, message){
  * @returns the new route created
  */
 async function addStepToRoute(routeToModify,user){
-    //display steps of route
-    console.clear()
-    console.log('Current steps for selected route:')
-    let stepArr = await DB.getSteps(routeToModify)
-    console.table(stepArr)
-
     let finished = false
     let validOrder = false
     let order
-    let getStep
+    let stepArr = await DB.getSteps(routeToModify)
 
     while(!finished) {
+        //display steps of route
+        console.clear()
+        console.log('Current steps for selected route:')
+        console.table(stepArr)
 
-        while (!validOrder) {
-            getStep = await inquirer.prompt([
-                {
-                    name: 'order',
-                    message: 'Enter the new step order. (1 for first step, 2 for second, etc...): ',
-                    type: 'number',
+
+        let getStep = await inquirer.prompt([
+            {
+                name: 'order',
+                message: 'Enter the new step order. (1 for first step, 2 for second, etc...): ',
+                type: 'input',
+                validate: (answer) => {
+                    answer = parseInt(answer)
+                    if (!Number.isInteger(answer) || answer > stepArr.length + 1 || answer < 1) {
+                        return 'Sorry, please enter a valid number.'
+                    } else {
+                        order = answer
+                        return true
+
+                    }
                 }
-            ])
-            if (!Number.isInteger(getStep.order) || getStep.order > stepArr.length + 1 || getStep.order < 1) {
-                console.log('Sorry, please enter a valid number.')
-            } else {
-                validOrder = true
-                order = getStep.order
             }
-        }
+        ])
 
         //begin creating new step
         let startingBuildingName
         let endingBuildingName
 
-        if (getStep.order === 1) {
+        if (order === 1) {
             startingBuildingName = await chooseBuilding('starting')
             endingBuildingName = stepArr[0].start_location
-        } else if (getStep.order !== (stepArr.length + 1)){
-            startingBuildingName = stepArr[getStep.order - 2].end_location
+        } else if (order !== (stepArr.length + 1)){
+            startingBuildingName = stepArr[order - 2].end_location
             endingBuildingName = await chooseBuilding('destination')
         } else {
             startingBuildingName = stepArr[stepArr.length - 1].end_location
@@ -535,9 +546,6 @@ async function addStepToRoute(routeToModify,user){
         if(askFinished.finished === 'Yes'){
             finished = true
         }
-        else{
-            validOrder = false
-        }
     }
 
 
@@ -562,7 +570,7 @@ async function addStepToRoute(routeToModify,user){
  * Gets all the buildings from the database and displays just the names. The user selects the building name for the building
  * they wish to choose
  * @param message - (start or destination)
- * @param buildingToRemove - removes the building from the list of options (so users to have the start and end buildings be the same building)
+ * @param buildingToRemove - removes the building from the list of options (so users can't have the start and end buildings be the same building)
  * @returns the acronym for the building selected by the user
  */
 async function chooseBuilding(message,buildingToRemove){
@@ -620,23 +628,24 @@ async function deleteStepFromRoute(routeToModify,user){
 
     let sure = true
     let validOrder = false
-    let getStep
+    let indexToDelete
 
-
-    while (!validOrder) {
-        getStep = await inquirer.prompt([
-            {
-                name: 'index',
-                message: 'Enter the index for the step you wish to delete: ',
-                type: 'number',
+    let getStep = await inquirer.prompt([
+        {
+            name: 'index',
+            message: 'Enter the index for the step you wish to delete: ',
+            type: 'input',
+            validate: (answer) => {
+                answer = parseInt(answer)
+                if (!Number.isInteger(answer) || answer > stepArr.length - 1 || answer < 0) {
+                    return 'Sorry, please enter a valid number.'
+                } else {
+                    indexToDelete = answer
+                    return true
+                }
             }
-        ])
-        if (!Number.isInteger(getStep.index) || getStep.index > stepArr.length - 1 || getStep.index < 0) {
-            console.log('Sorry, please enter a valid number.')
-        } else {
-            validOrder = true
         }
-    }
+    ])
 
     if(stepArr.length === 1){
         const askFinished = await inquirer.prompt([
@@ -659,7 +668,7 @@ async function deleteStepFromRoute(routeToModify,user){
 
     if(sure) {
         //delete step and reorganizes array
-        stepArr.splice(getStep.index, 1)
+        stepArr.splice(indexToDelete, 1)
         stepArr.sort(compareStepOrder)
         await cascadeStepArr(stepArr)
 
@@ -687,6 +696,7 @@ async function deleteStepFromRoute(routeToModify,user){
             await DB.deleteRoute(routeToModify)
         }
     }
+    //don't return a new route, user decided not to delete the step
     return null
 }
 
@@ -741,4 +751,5 @@ async function checkGoals(user_routes,user){
 }
 
 
-module.exports = {getGoals,getUserMenuChoice,modifyGoals,modifyRoutes,createRoute,displayTitle}
+
+module.exports = {getGoals,getUserMenuChoice,modifyGoals,modifyRoutes,createRoute,displayTitle,chooseBuilding}
