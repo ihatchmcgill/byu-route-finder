@@ -39,9 +39,13 @@ Log on to [AWS services](https://byulogin.awsapps.com/start#/) and navigate to t
 
 Under PowerUser, select Command line or programmatic access.
 
-Click the commands under `Option 1` to copy the set of 3 commands to set the proper environmental variables for you shell. Paste these into the terminal before running your program in order to access the AWS Parameter Store
+Click the commands under `Option 1` to copy the set of 3 commands to set the proper environmental variables for you shell. 
 
 ![AWS COMMANDS](images/envAWS.png?raw=true "envAWS")
+
+Paste these into the terminal before running your program in order to access the AWS Parameter Store
+
+![SHELL PASTE](images/pasteenv.png?raw=true "pasteenv")
 
 ## Usage
 
