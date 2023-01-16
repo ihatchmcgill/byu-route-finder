@@ -41,6 +41,7 @@ Under PowerUser, select Command line or programmatic access.
 
 Click the commands under `Option 1` to copy the set of 3 commands to set the proper environmental variables for you shell. Paste these into the terminal before running your program in order to access the AWS Parameter Store
 
+![AWS COMMANDS](mcgill-technical-challenge/images/envAWS.png?raw=true "envAWS")
 
 ## Usage
 
