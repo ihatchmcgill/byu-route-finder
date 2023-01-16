@@ -562,35 +562,6 @@ async function addStepToRoute(routeToModify,user){
     return newRoute
 }
 
-/**
- * Helper function that is called when the user creates new steps. This automatically calculates the new step's distance in steps and
- * calories burned. This is necessary as it doesn't rely on the database functions to calculate these values
- * @param The new Step
- * @returns an object similar to the Step class, but with the added values for steps and calories.
- */
-async function addStepsAndCalsToStep(step){
-    const STEPS_PER_MILE = 2200
-    const CALS_PER_MILE = 100
-
-    const newSteps = step.distance_miles * STEPS_PER_MILE
-    const newCals = step.distance_miles * CALS_PER_MILE
-
-    const newStepObj = {
-        step_order: step.step_order,
-        byu_id: step.byu_id,
-        route_id: step.route_id,
-        week_day: step.week_day,
-        start_location: step.start_location,
-        end_location: step.end_location,
-        distance_miles: step.distance_miles,
-        distance_steps: newSteps,
-        calories_burned: newCals,
-        time_minutes: step.time_minutes
-    }
-    return newStepObj
-
-}
-
 
 /**
  * Gets the steps for a specific route and will prompt the user for an index for a step to delete. The step is deleted
