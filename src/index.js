@@ -64,6 +64,7 @@ async function main() {
             //returns false is there are no classes in their schedule (not a student)
             const userSchedule = await API.getUserSchedule(user)
             if(userSchedule){
+                console.clear()
                 console.log('Starting routes have been generated for you based your current class schedule!')
             }
             else{
@@ -100,6 +101,7 @@ async function main() {
                 try{
                     const valid = await API.getUserSchedule(user)
                     if(valid){
+                        console.clear()
                         console.log('Starting routes have been generated for you based your current class schedule!')
                     }
                     else{

@@ -10,8 +10,8 @@ const Step = require('./Classes/Step')
 const Route = require('./Classes/Route')
 const DB = require('./database')
 const AWS = require('./aws')
-const MENU = require('./menus')
 const axios = require('axios')
+const inquirer = require("inquirer");
 
 
 
@@ -209,7 +209,7 @@ async function createStepsArr(scheduleBuildingArr,user,weekday){
         let destinationBuilding
         if(scheduleBuildingArr.length === 1) {
             console.log(`Looks like you only have one class on ${weekday}, please select a starting point for your route.`)
-            startBuilding = await DB.getBuilding(await MENU.chooseBuilding("starting"))
+            startBuilding = await DB.getBuilding(await chooseBuilding("starting"))
             destinationBuilding = await DB.getBuilding(scheduleBuildingArr[0])
         }
         else {
@@ -310,12 +310,9 @@ async function generateRoute(stepArr,user){
 }
 
 /**
- * The main method called to generate routes for a user based on their class schedule. Calls the EnrolledClasses API from BYU
- * and creates a route for each day of the week. The routes and the corresponding steps are then inserted into the Database
- * so long as the number of steps in the route isn't 0
- *
- * @param user
- * @returns True if the user had classes, and they were successfully turned into routes, false otherwise
+ * Helper function that will simply calculate the year term for the current date. This is intentional as the program is meant to
+ * only display data from the user's current classes if there are any.
+ * @returns The year term as a string
  */
 
 const getYearTermHelper = () => {
@@ -344,7 +341,14 @@ const getYearTermHelper = () => {
 }
 
 
-
+/**
+ * The main method called to generate routes for a user based on their class schedule. Calls the EnrolledClasses API from BYU
+ * and creates a route for each day of the week. The routes and the corresponding steps are then inserted into the Database
+ * so long as the number of steps in the route isn't 0
+ *
+ * @param user
+ * @returns True if the user had classes, and they were successfully turned into routes, false otherwise
+ */
 
 async function getUserSchedule(user){
     let yearTerm = getYearTermHelper()
@@ -419,7 +423,50 @@ async function generateAndInsertRoute(stepArr,user){
     }
 }
 
+/**
+ * Gets all the buildings from the database and displays just the names. The user selects the building name for the building
+ * they wish to choose
+ * @param message - (start or destination)
+ * @param buildingToRemove - removes the building from the list of options (so users can't have the start and end buildings be the same building)
+ * @returns the acronym for the building selected by the user
+ */
+async function chooseBuilding(message,buildingToRemove){
+    //array of objects
+    const buildings = await DB.getAllBuildings()
+
+    //pull out just the names of buildings
+
+    let buildingNames = buildings.map(currBuilding => currBuilding.building_name)
+
+    // let buildingNames = []
+    // for(let i = 0; i < buildings.length;i++){
+    //     buildingNames.push(buildings[i].building_name)
+    // }
+    //sort names
+    buildingNames.sort();
+
+    const index = buildingNames.indexOf(buildingToRemove);
+    if (index > -1) {
+        buildingNames.splice(index, 1);
+    }
+    const buildingList = await inquirer.prompt([
+        {
+            name: 'choice',
+            message: `Please select a ${message} building`,
+            type: 'rawlist',
+            pageSize: 25,
+            choices: () => buildingNames,
+        }
+    ])
+    //returns just the acronym
+    try{
+        return DB.getAcronym(buildingList.choice)
+    }catch(e){
+        console.error("Something went wrong selecting buildings")
+    }
+
+}
 
 
 
-module.exports = {getUserFromToken,getBuildings,getUserSchedule,getDistanceBuildings,generateRoute}
+module.exports = {getUserFromToken,getBuildings,getUserSchedule,getDistanceBuildings,generateRoute,chooseBuilding}

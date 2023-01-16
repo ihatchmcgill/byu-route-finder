@@ -270,7 +270,7 @@ async function tableIsEmpty(tableName){
  * @returns none
  */
 async function insertSteps(stepsArr) {
-    await insertRoute(stepsArr)
+    //await insertRoute(stepsArr)
     const client = new Client(clientParams)
     try{
         await client.connect()
@@ -281,7 +281,6 @@ async function insertSteps(stepsArr) {
         }
         await client.end()
     } catch(e){
-        console.error(e)
         console.error('Failed to insert steps into steps table')
         await client.end()
     }
@@ -379,14 +378,15 @@ async function getSteps(route){
         const queryText = `SELECT * FROM steps WHERE route_id = '${route.route_id}'`
         const result = await client.query(queryText)
         await client.end()
-        //create step objects with data from table, return arr
-        let stepArr = []
-        for(let i = 0; i < result.rows.length; i++){
-            stepArr.push(new Step(result.rows[i].step_order,result.rows[i].byu_id,result.rows[i].route_id,result.rows[i].week_day,result.rows[i].start_location,
-                result.rows[i].end_location,result.rows[i].distance_miles,result.rows[i].time_minutes))
-        }
 
-        return stepArr
+        //create step objects with data from table, return arr
+        // let stepArr = []
+        // for(let i = 0; i < result.rows.length; i++){
+        //     stepArr.push(new Step(result.rows[i].step_order,result.rows[i].byu_id,result.rows[i].route_id,result.rows[i].week_day,result.rows[i].start_location,
+        //         result.rows[i].end_location,result.rows[i].distance_miles,result.rows[i].time_minutes))
+        // }
+        //console.log(result.rows)
+        return result.rows
     }catch (e){
         await client.end()
         throw e

@@ -197,13 +197,13 @@ async function createRoute(user){
 
         //first step will have a start and end location
         if(stepOrder === 1){
-            startingBuildingName =  await chooseBuilding('starting')
-            endingBuildingName  = await chooseBuilding('destination',startingBuildingName)
+            startingBuildingName =  await API.chooseBuilding('starting')
+            endingBuildingName  = await API.chooseBuilding('destination',startingBuildingName)
         }
         //all other steps only get a destination
         else{
             startingBuildingName =  stepArr[stepArr.length-1].end_location
-            endingBuildingName  = await chooseBuilding('destination',startingBuildingName)
+            endingBuildingName  = await API.chooseBuilding('destination',startingBuildingName)
         }
 
         //get actual building objects using the names chosen by user
@@ -469,14 +469,14 @@ async function getValidIndex(user_routes, message){
  */
 async function addStepToRoute(routeToModify,user){
     let finished = false
-    let validOrder = false
     let order
-    let stepArr = await DB.getSteps(routeToModify)
 
+    let newRoute
     while(!finished) {
         //display steps of route
         console.clear()
         console.log('Current steps for selected route:')
+        let stepArr = await DB.getSteps(routeToModify)
         console.table(stepArr)
 
 
@@ -503,14 +503,14 @@ async function addStepToRoute(routeToModify,user){
         let endingBuildingName
 
         if (order === 1) {
-            startingBuildingName = await chooseBuilding('starting')
+            startingBuildingName = await API.chooseBuilding('starting')
             endingBuildingName = stepArr[0].start_location
         } else if (order !== (stepArr.length + 1)){
             startingBuildingName = stepArr[order - 2].end_location
-            endingBuildingName = await chooseBuilding('destination')
+            endingBuildingName = await API.chooseBuilding('destination')
         } else {
             startingBuildingName = stepArr[stepArr.length - 1].end_location
-            endingBuildingName = await chooseBuilding('destination')
+            endingBuildingName = await API.chooseBuilding('destination')
         }
 
         //get actual building objects
@@ -534,6 +534,15 @@ async function addStepToRoute(routeToModify,user){
         stepArr.sort(compareStepOrder)
         await cascadeStepArr(stepArr)
 
+        //generateRoute will also update the stepArr to have the right ID
+        newRoute = await API.generateRoute(stepArr,user)
+        //delete old route in DB, insert new one
+        await DB.deleteRoute(routeToModify)
+        //console.log('route deleted')
+        await DB.insertRoute(newRoute)
+        //console.log('route inserted')
+        await DB.insertSteps(stepArr)
+
         console.log('Step added!')
         const askFinished = await inquirer.prompt([
             {
@@ -546,69 +555,42 @@ async function addStepToRoute(routeToModify,user){
         if(askFinished.finished === 'Yes'){
             finished = true
         }
+        else{
+            routeToModify = newRoute
+        }
     }
-
-
-    //console.log(stepArr)
-    //check that start and end locs make sense adjust ones that are off.
-
-
-    //generateRoute will also update the stepArr to have the right ID
-    const newRoute = await API.generateRoute(stepArr,user)
-    //console.log(newRoute)
-    //delete old route in DB, insert new one
-    await DB.deleteRoute(routeToModify)
-    //console.log('route deleted')
-    await DB.insertRoute(newRoute)
-    //console.log('route inserted')
-    await DB.insertSteps(stepArr)
     return newRoute
 }
 
-
 /**
- * Gets all the buildings from the database and displays just the names. The user selects the building name for the building
- * they wish to choose
- * @param message - (start or destination)
- * @param buildingToRemove - removes the building from the list of options (so users can't have the start and end buildings be the same building)
- * @returns the acronym for the building selected by the user
+ * Helper function that is called when the user creates new steps. This automatically calculates the new step's distance in steps and
+ * calories burned. This is necessary as it doesn't rely on the database functions to calculate these values
+ * @param The new Step
+ * @returns an object similar to the Step class, but with the added values for steps and calories.
  */
-async function chooseBuilding(message,buildingToRemove){
-    //array of objects
-    const buildings = await DB.getAllBuildings()
+async function addStepsAndCalsToStep(step){
+    const STEPS_PER_MILE = 2200
+    const CALS_PER_MILE = 100
 
-    //pull out just the names of buildings
+    const newSteps = step.distance_miles * STEPS_PER_MILE
+    const newCals = step.distance_miles * CALS_PER_MILE
 
-    let buildingNames = buildings.map(currBuilding => currBuilding.building_name)
-
-    // let buildingNames = []
-    // for(let i = 0; i < buildings.length;i++){
-    //     buildingNames.push(buildings[i].building_name)
-    // }
-    //sort names
-    buildingNames.sort();
-
-    const index = buildingNames.indexOf(buildingToRemove);
-    if (index > -1) {
-        buildingNames.splice(index, 1);
+    const newStepObj = {
+        step_order: step.step_order,
+        byu_id: step.byu_id,
+        route_id: step.route_id,
+        week_day: step.week_day,
+        start_location: step.start_location,
+        end_location: step.end_location,
+        distance_miles: step.distance_miles,
+        distance_steps: newSteps,
+        calories_burned: newCals,
+        time_minutes: step.time_minutes
     }
-    const buildingList = await inquirer.prompt([
-        {
-            name: 'choice',
-            message: `Please select a ${message} building`,
-            type: 'rawlist',
-            pageSize: 25,
-            choices: () => buildingNames,
-        }
-    ])
-    //returns just the acronym
-    try{
-        return DB.getAcronym(buildingList.choice)
-    }catch(e){
-        console.error("Something went wrong selecting buildings")
-    }
+    return newStepObj
 
 }
+
 
 /**
  * Gets the steps for a specific route and will prompt the user for an index for a step to delete. The step is deleted
@@ -752,4 +734,4 @@ async function checkGoals(user_routes,user){
 
 
 
-module.exports = {getGoals,getUserMenuChoice,modifyGoals,modifyRoutes,createRoute,displayTitle,chooseBuilding}
+module.exports = {getGoals,getUserMenuChoice,modifyGoals,modifyRoutes,createRoute,displayTitle}
