@@ -53,7 +53,19 @@ Paste these into the terminal before running your program in order to access the
 2. `cd` into the project with `cd mcgill-technical-challenge/`
 3. Start the program with `npm run all`. This will extract and start the database and run the program.
 4. Enter your **bearer token** when prompted by the program. 
-5. The welcome screen and main menu will be shown, select options to interact with the program.
+5. Upon beginning the program for the first time, starting routes will be generated for the user based on their current class scheudle.
+6. The welcome screen and main menu will be shown, select options to interact with the program.
 
+## Architecture and Database
 
+The program is broken up into files to help organize the code. This is an object oriented application, with those classes being Routes, Steps, and Buildings. These objects are stored in a database useing Docker. The database can be viewed using Adminer, which is most easily accesed from the Docker Desktop application. Certain values are stored in the database and calculated as automatically as data is stored there. These values are calories_burned and distance_steps. You should be aware of this when pulling data from the Database, as these values will be returned, but not stored locally.
 
+Although the list of buildings is quite long, this data is not cached as the API is only called one time, when first populating the database with the appropriate tables.
+
+A full list of the dependencies used is as follows:
+1. aws-sdk - For accesssing the AWS Parameter Store 
+2. open - For opening a browswer given an link.
+3. pg - For interacting with the Database
+4. inquirer - For collecting and validating user input
+5. axios - To retrieve data from GET API calls.
+6. uuid - To create unique ID's for Routes
