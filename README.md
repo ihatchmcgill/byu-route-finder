@@ -2,7 +2,7 @@
 
 # BYU Route Finder
 ## Description:
-The BYU Route Finder app is the latest and greatest in BYU technology. With this app, users will be given a set of routes that they can use to track helpful information such as distance and time, as well as other health considerations like the steps taken and calories burned. Using state of the art algorithms, these routes are generated for students, but are completely customizable. Achieving your health goals isn't easy, but with the Route Finder app you can track your fitness goals and Route Finder will let you know which of your routes help you the most. The future is now!
+The BYU Route Finder app is the latest and greatest in BYU technology. With this app, users will be given a set of routes that they can use to track helpful information such as distance and time, as well as other health considerations like the steps taken and calories burned. Using state of the art algorithms, these routes are generated for students, but are completely customizable. Achieving your health goals isn't easy, but with the Route Finder app you can track your fitness goals and Route Finder will let you know which of your routes helps you the most. The future is now!
 
 
 
@@ -39,16 +39,7 @@ Log on to [AWS services](https://byulogin.awsapps.com/start#/) and navigate to t
 
 Under PowerUser, select Command line or programmatic access.
 
-In the terminal before you run the program, type `aws configure` and then copy and paste in your AWS credentials. This will allow 
-you to set the aws_access_key_id and the aws_secret_access_key.
-
-![AWS_CONFIGURE](https://github.com/byu-oit-training/mcgill-technical-challenge/blob/main/awsConfig.PNG?raw=true)
-
-After you have set your Access Key ID and the Secret Access Key, you will 
-need to set your Session Token by typing in `aws configure set aws_session_token` and then your session token.
-
-![SESSION_TOKEN](https://github.com/byu-oit-training/mcgill-technical-challenge/blob/main/sessionToken.PNG?raw=true)
-
+Click the commands under `Option 1` to copy the set of 3 commands to set the proper environmental variables for you shell. Paste these into the terminal before running your program in order to access the AWS Parameter Store
 
 
 ## Usage
