@@ -2,7 +2,7 @@
 .idea
 # ignore installed packages
 node_modules
-# the dabase folder alone is really big and doesn't owrk when cloned on other computers, so ignore it
+# the database folder alone is really big and doesn't work when cloned on other computers, so ignore it
 db
 # don't however, ingore the db.zip. we need to commit that.
 # if you end up using .env or .env0db, we need to not inclue those either
